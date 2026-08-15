@@ -1,0 +1,95 @@
+.practice-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.practice-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.title-area {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.title-area h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.title-area p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.action-area {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submit-btn {
+  padding: 12px 30px;
+}
+
+/* Feedback Box */
+.feedback-section {
+  padding: 25px;
+  background: var(--glass-card);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.feedback-header {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.correct-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--success);
+}
+
+.incorrect-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--error);
+}
+
+.explanation-area {
+  border-top: 1px solid var(--glass-border);
+  padding-top: 15px;
+}
+
+.explanation-area h5 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.explanation-area p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.next-btn {
+  align-self: flex-end;
+  padding: 12px 25px;
+  margin-top: 10px;
+}

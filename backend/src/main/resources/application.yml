@@ -1,0 +1,30 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/codepilot?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:raja2006}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    defer-datasource-initialization: true # Ensures schema creation runs before data.sql seeding
+  sql:
+    init:
+      mode: always # Always execute data.sql on startup
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVwaWxvdC1jYW5kaWRhdGUtcG9ydGZvbGlvLXByb2plY3Qtd2hpY2gtbXVzdC1iZS0yNTYtYml0cy1sb25n}
+    expiration-ms: 86400000 # 24 hours

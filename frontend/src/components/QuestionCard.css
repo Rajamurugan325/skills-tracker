@@ -1,0 +1,120 @@
+.question-card {
+  padding: 30px;
+  margin-bottom: 25px;
+  background: var(--glass-card);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.category-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(6, 182, 212, 0.1);
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.difficulty-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.difficulty-tag.easy {
+  color: var(--success);
+  background: var(--success-glow);
+}
+
+.difficulty-tag.medium {
+  color: var(--warning);
+  background: var(--warning-glow);
+}
+
+.difficulty-tag.hard {
+  color: var(--error);
+  background: var(--error-glow);
+}
+
+.question-text {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: 25px;
+}
+
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option-button {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  padding: 16px 20px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.option-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.option-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.option-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+/* Selected Option State */
+.option-button.selected {
+  background: var(--primary-glow);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 15px 0 rgba(99, 102, 241, 0.1);
+}
+
+.option-button.selected .option-badge {
+  background: var(--primary);
+  color: var(--text-primary);
+  border-color: var(--primary);
+}
+
+.option-button.selected .option-text {
+  color: var(--text-primary);
+}

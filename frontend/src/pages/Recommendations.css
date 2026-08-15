@@ -1,0 +1,87 @@
+.recs-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.recs-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.recs-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.recs-header p {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.recs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rec-card {
+  padding: 25px;
+  background: var(--glass-card);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: var(--transition);
+}
+
+.rec-card:hover {
+  border-color: var(--glass-card-hover-border);
+  transform: translateY(-2px);
+}
+
+.rec-badge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.priority-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.priority-tag.high {
+  color: var(--error);
+  background: var(--error-glow);
+}
+
+.priority-tag.medium {
+  color: var(--warning);
+  background: var(--warning-glow);
+}
+
+.priority-tag.low {
+  color: var(--success);
+  background: var(--success-glow);
+}
+
+.rec-info h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rec-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  line-height: 1.5;
+}

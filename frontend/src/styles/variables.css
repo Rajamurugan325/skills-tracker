@@ -1,0 +1,46 @@
+:root {
+  /* Color Palette - Vibrant Indigo, Violet & Dark Slate */
+  --bg-primary: #08090e;
+  --bg-secondary: rgba(13, 16, 29, 0.7);
+  --bg-tertiary: rgba(22, 26, 46, 0.5);
+  
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-glow: rgba(99, 102, 241, 0.3);
+  
+  --secondary: #a855f7;
+  --secondary-hover: #9333ea;
+  --secondary-glow: rgba(168, 85, 247, 0.2);
+  
+  --accent: #06b6d4;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --success: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.15);
+  --warning: #f59e0b;
+  --warning-glow: rgba(245, 158, 11, 0.15);
+  --error: #ef4444;
+  --error-glow: rgba(239, 68, 68, 0.15);
+  
+  /* Glassmorphism Specs */
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(14px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  
+  --glass-card: rgba(15, 18, 36, 0.65);
+  --glass-card-border: rgba(255, 255, 255, 0.06);
+  --glass-card-hover: rgba(255, 255, 255, 0.04);
+  --glass-card-hover-border: rgba(255, 255, 255, 0.12);
+  
+  /* Layout and Transitions */
+  --sidebar-width: 260px;
+  --navbar-height: 70px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 24px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}

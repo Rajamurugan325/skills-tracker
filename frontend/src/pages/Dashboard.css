@@ -1,0 +1,232 @@
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.dashboard-grid-top {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 25px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid-top {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-card {
+  padding: 25px;
+  background: var(--glass-card);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card-header-with-icon h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-icon {
+  padding: 8px;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+}
+
+.card-icon.indigo {
+  color: var(--primary);
+  background: var(--primary-glow);
+}
+
+.card-icon.cyan {
+  color: var(--accent);
+  background: rgba(6, 182, 212, 0.1);
+}
+
+.card-icon.green {
+  color: var(--success);
+  background: var(--success-glow);
+}
+
+.card-icon.red {
+  color: var(--error);
+  background: var(--error-glow);
+}
+
+.card-icon.orange {
+  color: var(--warning);
+  background: var(--warning-glow);
+}
+
+/* Gauge Circle Styles */
+.readiness-card {
+  align-items: center;
+  justify-content: center;
+}
+
+.readiness-gauge {
+  margin: 10px 0;
+}
+
+.gauge-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary) calc(var(--percentage) * 1%), rgba(255, 255, 255, 0.05) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px 0 var(--primary-glow);
+}
+
+.gauge-inner {
+  width: 126px;
+  height: 126px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.gauge-inner h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.gauge-inner span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.gauge-status {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 15px;
+  line-height: 1.5;
+}
+
+.status-high { color: var(--success); font-weight: 600; }
+.status-medium { color: var(--warning); font-weight: 600; }
+.status-low { color: var(--error); font-weight: 600; }
+
+/* Stats grid */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-box {
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-content span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-content h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 4px;
+}
+
+/* Charts Grid */
+.dashboard-grid-middle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid-middle {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.chart-container {
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-placeholder {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Bottom Grid Lists */
+.dashboard-grid-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid-bottom {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dashboard-list li {
+  font-size: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  font-weight: 500;
+}
+
+.dashboard-list li.list-item-ok {
+  border-left: 3px solid var(--success);
+  color: var(--text-primary);
+}
+
+.dashboard-list li.list-item-warn {
+  border-left: 3px solid var(--error);
+  color: var(--text-primary);
+}

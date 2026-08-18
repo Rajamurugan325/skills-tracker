@@ -16,8 +16,10 @@ public class MockInterviewController {
     private MockInterviewService mockInterviewService;
 
     @PostMapping("/start")
-    public ResponseEntity<MockInterviewStartResponse> startInterview(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        MockInterviewStartResponse start = mockInterviewService.startInterview(userPrincipal.getId());
+    public ResponseEntity<MockInterviewStartResponse> startInterview(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody(required = false) MockInterviewStartRequest request) {
+        MockInterviewStartResponse start = mockInterviewService.startInterview(userPrincipal.getId(), request);
         return ResponseEntity.ok(start);
     }
 

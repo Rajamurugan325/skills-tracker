@@ -59,24 +59,23 @@ public class QuizServiceImpl implements QuizService {
             // Student wants to practice a specific topic
             Topic topic = topicRepository.findById(startRequest.getTopicId())
                     .orElseThrow(() -> new ResourceNotFoundException("Topic not found with id: " + startRequest.getTopicId()));
-            List<Question> questions = questionRepository.findByTopicId(topic.getId());
-            if (questions.isEmpty()) {
+            selectedQuestions = questionRepository.findRandomByTopicId(topic.getId(), 10);
+            if (selectedQuestions.isEmpty()) {
                 throw new BadRequestException("No questions available for topic: " + topic.getName());
             }
-            // Shuffle and pick up to 10
-            Collections.shuffle(questions);
-            selectedQuestions = questions.stream().limit(10).collect(Collectors.toList());
         } else {
             // Adaptive mode or Category mode
             selectedQuestions = adaptiveEngineService.selectQuestions(user, startRequest.getCategory(), 10);
             if (selectedQuestions.isEmpty()) {
                 // If adaptive returned nothing, pick any random questions from database
-                List<Question> allQuestions = questionRepository.findAll();
-                if (allQuestions.isEmpty()) {
+                if (startRequest.getCategory() != null && !startRequest.getCategory().trim().isEmpty()) {
+                    selectedQuestions = questionRepository.findRandomByCategory(startRequest.getCategory().trim(), 10);
+                } else {
+                    selectedQuestions = questionRepository.findRandom(10);
+                }
+                if (selectedQuestions.isEmpty()) {
                     throw new ResourceNotFoundException("No questions seeded in the database");
                 }
-                Collections.shuffle(allQuestions);
-                selectedQuestions = allQuestions.stream().limit(10).collect(Collectors.toList());
             }
         }
 

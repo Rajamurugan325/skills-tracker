@@ -10,6 +10,7 @@ import lombok.*;
 public class MockInterviewSubmitResponse {
     private Long mockInterviewId;
     private int currentRound;
+    private String roundName;
     private int questionIndex; // 1 to 20
     private QuizQuestionDto nextQuestion;
     private boolean isFinished;

@@ -40,15 +40,62 @@ const Dashboard = () => {
   if (loading) return <Loading />;
   if (error) return <Error message={error} />;
 
-  // Prepare radar chart data from skills
-  // Let's filter top 6 skills or summarize by category
-  const categoryData = [
-    { subject: 'Java Core', A: readiness?.javaScore || 0, fullMark: 100 },
-    { subject: 'Database & SQL', A: readiness?.sqlScore || 0, fullMark: 100 },
-    { subject: 'Data Structures', A: readiness?.dsaScore || 0, fullMark: 100 },
-    { subject: 'Mock Interview', A: readiness?.mockInterviewScore || 0, fullMark: 100 },
-    { subject: 'Consistency', A: readiness?.consistencyScore || 0, fullMark: 100 }
-  ];
+  // Group skills by category to populate the radar chart dynamically
+  const categoryScores = {};
+  skills.forEach(s => {
+    const cat = s.category;
+    if (cat) {
+      if (!categoryScores[cat]) {
+        categoryScores[cat] = { sum: 0, count: 0 };
+      }
+      categoryScores[cat].sum += s.skillLevelPercentage;
+      categoryScores[cat].count += 1;
+    }
+  });
+
+  const categoryData = Object.keys(categoryScores).map(cat => {
+    const avg = categoryScores[cat].sum / categoryScores[cat].count;
+    const categoryLabels = {
+      JAVA: 'Java Core',
+      SQL: 'Database & SQL',
+      DSA: 'Algorithms (DSA)',
+      C: 'C Programming',
+      PYTHON: 'Python Programming',
+      FULLSTACK: 'Full Stack Web',
+      DATA_ANALYTICS: 'Data Analytics',
+      DATA_SCIENCE: 'Data Science',
+      SOFTWARE_TESTING: 'Software Testing',
+      AUTOMATION_TESTING: 'Automation Testing',
+      GIT_GITHUB: 'Git & GitHub',
+      DEVOPS: 'DevOps & CI/CD',
+      APTITUDE: 'Aptitude & Logic',
+      AI_TOOLS: 'AI & AI Tools',
+      NETWORKS: 'Computer Networks',
+      OPERATING_SYSTEMS: 'Operating Systems',
+      DBMS_CONCEPTS: 'DBMS Concepts',
+      CS_FUNDAMENTALS: 'CS Fundamentals',
+      SOFT_SKILLS: 'Soft Skills & HR',
+      DEVELOPER_TOOLS: 'Tools & Env'
+    };
+    return {
+      subject: categoryLabels[cat] || cat,
+      A: Math.round(avg),
+      fullMark: 100
+    };
+  });
+
+  if (categoryData.length < 3) {
+    const defaults = ['JAVA', 'SQL', 'DSA'];
+    defaults.forEach(d => {
+      const label = d === 'JAVA' ? 'Java Core' : d === 'SQL' ? 'Database & SQL' : 'Algorithms (DSA)';
+      if (!categoryData.some(item => item.subject === label)) {
+        categoryData.push({ subject: label, A: 0, fullMark: 100 });
+      }
+    });
+  }
+
+  categoryData.push({ subject: 'Mock Interview', A: readiness?.mockInterviewScore || 0, fullMark: 100 });
+  categoryData.push({ subject: 'Consistency', A: readiness?.consistencyScore || 0, fullMark: 100 });
 
   // Prepare bar chart data from progress
   const progressChartData = progress.slice(0, 7).map(p => ({

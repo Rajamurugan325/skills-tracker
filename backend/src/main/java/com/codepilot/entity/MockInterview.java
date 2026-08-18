@@ -47,6 +47,24 @@ public class MockInterview {
     @Column(name = "overall_readiness")
     private double overallReadiness;
 
+    @Column(name = "interview_type")
+    private String interviewType;
+
+    @Column(name = "selected_skills")
+    private String selectedSkills;
+
+    @Column(name = "round1_name")
+    private String round1Name;
+
+    @Column(name = "round2_name")
+    private String round2Name;
+
+    @Column(name = "round3_name")
+    private String round3Name;
+
+    @Column(name = "round4_name")
+    private String round4Name;
+
     @Column(name = "feedback_summary", columnDefinition = "TEXT")
     private String feedbackSummary;
 

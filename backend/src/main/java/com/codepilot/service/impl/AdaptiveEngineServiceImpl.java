@@ -91,37 +91,29 @@ public class AdaptiveEngineServiceImpl implements AdaptiveEngineService {
             // Determine difficulty for this topic based on the user's last answers
             String targetDifficulty = determineTargetDifficulty(user.getId(), selectedTopic.getId());
 
-            // Query questions in this topic matching the difficulty
-            List<Question> availableQuestions = questionRepository.findByTopicIdAndDifficulty(selectedTopic.getId(), targetDifficulty);
-            // Filter out recently answered questions and those already selected in this quiz
-            List<Question> filtered = availableQuestions.stream()
-                    .filter(q -> !excludedIds.contains(q.getId()))
-                    .filter(q -> !selectedQuestions.stream().anyMatch(sq -> sq.getId().equals(q.getId())))
-                    .collect(Collectors.toList());
+            // Build the set of all excluded question IDs (recent + already selected in this session)
+            Set<Long> allExcluded = new HashSet<>(excludedIds);
+            selectedQuestions.forEach(q -> allExcluded.add(q.getId()));
+            Collection<Long> excludeList = allExcluded.isEmpty() ? Collections.singleton(-1L) : allExcluded;
 
-            // Fallback 1: If no questions match the target difficulty, try other difficulties in the same topic
-            if (filtered.isEmpty()) {
-                List<Question> allTopicQuestions = questionRepository.findByTopicId(selectedTopic.getId());
-                filtered = allTopicQuestions.stream()
-                        .filter(q -> !excludedIds.contains(q.getId()))
-                        .filter(q -> !selectedQuestions.stream().anyMatch(sq -> sq.getId().equals(q.getId())))
-                        .collect(Collectors.toList());
-            }
+            // Attempt to get random question matching topic and difficulty
+            Optional<Question> questionOpt = questionRepository.findRandomByTopicIdAndDifficultyExcluding(
+                    selectedTopic.getId(), targetDifficulty, excludeList);
 
-            // Fallback 2: If still empty, try any question in the category that hasn't been selected yet
-            if (filtered.isEmpty()) {
-                List<Question> fallbackPool = questionRepository.findAll().stream()
-                        .filter(q -> category == null || q.getTopic().getCategory().equalsIgnoreCase(category))
-                        .filter(q -> !selectedQuestions.stream().anyMatch(sq -> sq.getId().equals(q.getId())))
-                        .collect(Collectors.toList());
-                if (!fallbackPool.isEmpty()) {
-                    Question fallbackQ = fallbackPool.get(random.nextInt(fallbackPool.size()));
-                    selectedQuestions.add(fallbackQ);
-                }
+            if (questionOpt.isPresent()) {
+                selectedQuestions.add(questionOpt.get());
             } else {
-                // Select a random question from the filtered list
-                Question selectedQ = filtered.get(random.nextInt(filtered.size()));
-                selectedQuestions.add(selectedQ);
+                // Fallback 1: Try other difficulties in the same topic
+                Optional<Question> fallback1Opt = questionRepository.findRandomByTopicIdExcluding(
+                        selectedTopic.getId(), excludeList);
+                if (fallback1Opt.isPresent()) {
+                    selectedQuestions.add(fallback1Opt.get());
+                } else {
+                    // Fallback 2: Try any question in the category
+                    Optional<Question> fallback2Opt = questionRepository.findRandomByCategoryExcluding(
+                            category, excludeList);
+                    fallback2Opt.ifPresent(selectedQuestions::add);
+                }
             }
         }
 

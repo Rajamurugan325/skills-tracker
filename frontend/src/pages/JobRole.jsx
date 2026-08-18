@@ -112,6 +112,20 @@ const JobRole = () => {
 
               {successMsg && <div className="job-role-success"><CheckCircle size={14} /> {successMsg}</div>}
 
+              {/* Quiz vs Mock Interview Performance Comparison */}
+              <div className="performance-comparison-grid">
+                <div className="comparison-widget-card glass-panel">
+                  <h5>Adaptive Quiz Accuracy</h5>
+                  <h2>{readiness.avgQuizAccuracy}%</h2>
+                  <p>Average performance on quizzes matching this role's skills.</p>
+                </div>
+                <div className="comparison-widget-card glass-panel">
+                  <h5>Mock Interview Rating</h5>
+                  <h2>{readiness.avgMockAccuracy}%</h2>
+                  <p>Accuracy score in mock interviews on this role's skills.</p>
+                </div>
+              </div>
+
               <div className="comparison-section">
                 <h4>Skill Comparison Breakdown</h4>
                 <div className="comparison-list">

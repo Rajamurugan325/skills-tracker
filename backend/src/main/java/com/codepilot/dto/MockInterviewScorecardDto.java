@@ -15,6 +15,11 @@ public class MockInterviewScorecardDto {
     private int sqlScore;   // out of 5
     private int dsaScore;   // out of 5
     private int techScore;  // out of 5
+    private String round1Name;
+    private String round2Name;
+    private String round3Name;
+    private String round4Name;
+    private String interviewType;
     private String feedbackSummary;
     private List<String> strongAreas;
     private List<String> weakAreas;

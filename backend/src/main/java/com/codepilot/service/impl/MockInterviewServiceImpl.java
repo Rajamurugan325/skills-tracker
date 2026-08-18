@@ -40,41 +40,346 @@ public class MockInterviewServiceImpl implements MockInterviewService {
     @Autowired
     private ProfileRepository profileRepository;
 
+    @Autowired
+    private UserTopicProgressRepository userTopicProgressRepository;
+
     @Override
     @Transactional
-    public MockInterviewStartResponse startInterview(Long userId) {
+    public MockInterviewStartResponse startInterview(Long userId, MockInterviewStartRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        // Select Questions for each round
-        // Round 1: Java (5 Questions)
-        List<Question> javaQuestions = questionRepository.findAll().stream()
-                .filter(q -> "JAVA".equalsIgnoreCase(q.getTopic().getCategory()))
-                .collect(Collectors.toList());
-        Collections.shuffle(javaQuestions);
-        List<Question> round1 = javaQuestions.stream().limit(5).collect(Collectors.toList());
+        String type = (request != null && request.getType() != null) ? request.getType().toUpperCase() : "TECHNICAL";
+        List<String> skills = (request != null && request.getSkills() != null) ? request.getSkills() : new ArrayList<>();
+        String companyStyle = (request != null && request.getCompanyStyle() != null) ? request.getCompanyStyle().toUpperCase() : "";
 
-        // Round 2: SQL (5 Questions)
-        List<Question> sqlQuestions = questionRepository.findAll().stream()
-                .filter(q -> "SQL".equalsIgnoreCase(q.getTopic().getCategory()))
-                .collect(Collectors.toList());
-        Collections.shuffle(sqlQuestions);
-        List<Question> round2 = sqlQuestions.stream().limit(5).collect(Collectors.toList());
+        List<Question> round1 = new ArrayList<>();
+        List<Question> round2 = new ArrayList<>();
+        List<Question> round3 = new ArrayList<>();
+        List<Question> round4 = new ArrayList<>();
 
-        // Round 3: DSA (5 Questions)
-        List<Question> dsaQuestions = questionRepository.findAll().stream()
-                .filter(q -> "DSA".equalsIgnoreCase(q.getTopic().getCategory()))
-                .collect(Collectors.toList());
-        Collections.shuffle(dsaQuestions);
-        List<Question> round3 = dsaQuestions.stream().limit(5).collect(Collectors.toList());
+        String round1Name = "Round 1: Core Programming";
+        String round2Name = "Round 2: Databases & Systems";
+        String round3Name = "Round 3: Data Structures & Logic";
+        String round4Name = "Round 4: Software Design & Tools";
 
-        // Round 4: Tech Interview (5 mixed questions)
-        List<Question> allQuestions = questionRepository.findAll();
-        Collections.shuffle(allQuestions);
-        List<Question> round4 = allQuestions.stream()
-                .filter(q -> !round1.contains(q) && !round2.contains(q) && !round3.contains(q))
-                .limit(5)
-                .collect(Collectors.toList());
+        if ("NON_TECHNICAL".equals(type)) {
+            round1 = questionRepository.findRandomByCategory("APTITUDE", 5);
+            
+            Set<Long> excluded = new HashSet<>();
+            round1.forEach(q -> excluded.add(q.getId()));
+            Collection<Long> excl2 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round2 = questionRepository.findRandomExcluding(excl2, 5).stream()
+                    .filter(q -> "APTITUDE".equalsIgnoreCase(q.getTopic().getCategory()))
+                    .collect(Collectors.toList());
+            if (round2.size() < 5) {
+                round2.addAll(questionRepository.findRandomByCategory("APTITUDE", 5 - round2.size()));
+            }
+            round2.forEach(q -> excluded.add(q.getId()));
+
+            Collection<Long> excl3 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round3 = questionRepository.findRandomExcluding(excl3, 5).stream()
+                    .filter(q -> "SOFT_SKILLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                    .collect(Collectors.toList());
+            if (round3.size() < 5) {
+                round3.addAll(questionRepository.findRandomByCategory("SOFT_SKILLS", 5 - round3.size()));
+            }
+            round3.forEach(q -> excluded.add(q.getId()));
+
+            Collection<Long> excl4 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round4 = questionRepository.findRandomExcluding(excl4, 5).stream()
+                    .filter(q -> "SOFT_SKILLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                    .collect(Collectors.toList());
+            if (round4.size() < 5) {
+                round4.addAll(questionRepository.findRandomByCategory("SOFT_SKILLS", 5 - round4.size()));
+            }
+
+            round1Name = "Round 1: Quantitative Aptitude";
+            round2Name = "Round 2: Logical & Verbal Reasoning";
+            round3Name = "Round 3: Soft Skills & Teamwork";
+            round4Name = "Round 4: HR & Leadership Scenarios";
+
+        } else if ("INDIVIDUAL".equals(type) && !skills.isEmpty()) {
+            String skill = skills.get(0).toUpperCase();
+            round1 = questionRepository.findRandomByCategory(skill, 5);
+            
+            Set<Long> excluded = new HashSet<>();
+            round1.forEach(q -> excluded.add(q.getId()));
+            Collection<Long> excl2 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round2 = questionRepository.findRandomExcluding(excl2, 5).stream()
+                    .filter(q -> q.getTopic().getCategory().equalsIgnoreCase(skill))
+                    .collect(Collectors.toList());
+            if (round2.size() < 5) {
+                round2.addAll(questionRepository.findRandomExcluding(excl2, 5 - round2.size()));
+            }
+            round2.forEach(q -> excluded.add(q.getId()));
+            
+            Collection<Long> excl3 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round3 = questionRepository.findRandomExcluding(excl3, 5).stream()
+                    .filter(q -> q.getTopic().getCategory().equalsIgnoreCase(skill))
+                    .collect(Collectors.toList());
+            if (round3.size() < 5) {
+                round3.addAll(questionRepository.findRandomExcluding(excl3, 5 - round3.size()));
+            }
+            round3.forEach(q -> excluded.add(q.getId()));
+            
+            Collection<Long> excl4 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round4 = questionRepository.findRandomExcluding(excl4, 5).stream()
+                    .filter(q -> q.getTopic().getCategory().equalsIgnoreCase(skill))
+                    .collect(Collectors.toList());
+            if (round4.size() < 5) {
+                round4.addAll(questionRepository.findRandomExcluding(excl4, 5 - round4.size()));
+            }
+
+            String skillLabel = getCategoryLabel(skill);
+            round1Name = "Round 1: " + skillLabel + " Basics";
+            round2Name = "Round 2: " + skillLabel + " Core Concepts";
+            round3Name = "Round 3: " + skillLabel + " Advanced Problems";
+            round4Name = "Round 4: " + skillLabel + " Practical & Tool Scenarios";
+
+        } else if ("MULTIPLE".equals(type) && !skills.isEmpty()) {
+            int numSkills = skills.size();
+            List<Question> pool = new ArrayList<>();
+            Set<Long> excluded = new HashSet<>();
+            int perSkill = 20 / numSkills;
+            if (perSkill == 0) perSkill = 1;
+            
+            for (String skill : skills) {
+                Collection<Long> excl = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                List<Question> skillQ = questionRepository.findRandomExcluding(excl, perSkill).stream()
+                        .filter(q -> q.getTopic().getCategory().equalsIgnoreCase(skill))
+                        .collect(Collectors.toList());
+                if (skillQ.size() < perSkill) {
+                    skillQ.addAll(questionRepository.findRandomByCategory(skill, perSkill - skillQ.size()));
+                }
+                skillQ.forEach(q -> excluded.add(q.getId()));
+                pool.addAll(skillQ);
+            }
+            if (pool.size() < 20) {
+                Collection<Long> excl = pool.stream().map(Question::getId).collect(Collectors.toList());
+                if (excl.isEmpty()) excl = Collections.singleton(-1L);
+                pool.addAll(questionRepository.findRandomExcluding(excl, 20 - pool.size()));
+            }
+            
+            round1 = new ArrayList<>(pool.subList(0, 5));
+            round2 = new ArrayList<>(pool.subList(5, 10));
+            round3 = new ArrayList<>(pool.subList(10, 15));
+            round4 = new ArrayList<>(pool.subList(15, 20));
+
+            String skill1 = getCategoryLabel(skills.get(0));
+            String skill2 = skills.size() > 1 ? getCategoryLabel(skills.get(1)) : "Secondary Skill";
+            round1Name = "Round 1: " + skill1 + " Fundamentals";
+            round2Name = "Round 2: " + skill1 + " Applications";
+            round3Name = "Round 3: " + skill2 + " Fundamentals";
+            round4Name = "Round 4: " + skill2 + " Applications";
+
+        } else if ("PLACEMENT".equals(type)) {
+            round1 = questionRepository.findRandomByCategory("APTITUDE", 5);
+
+            Set<Long> excluded = new HashSet<>();
+            round1.forEach(q -> excluded.add(q.getId()));
+            Collection<Long> excl2 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round2 = questionRepository.findRandomExcluding(excl2, 5).stream()
+                    .filter(q -> "CS_FUNDAMENTALS".equalsIgnoreCase(q.getTopic().getCategory()) 
+                              || "DBMS_CONCEPTS".equalsIgnoreCase(q.getTopic().getCategory())
+                              || "NETWORKS".equalsIgnoreCase(q.getTopic().getCategory())
+                              || "OPERATING_SYSTEMS".equalsIgnoreCase(q.getTopic().getCategory()))
+                    .collect(Collectors.toList());
+            if (round2.size() < 5) {
+                round2.addAll(questionRepository.findRandomByCategory("CS_FUNDAMENTALS", 5 - round2.size()));
+            }
+            round2.forEach(q -> excluded.add(q.getId()));
+
+            Collection<Long> excl3 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round3 = questionRepository.findRandomExcluding(excl3, 5).stream()
+                    .filter(q -> "JAVA".equalsIgnoreCase(q.getTopic().getCategory()) 
+                              || "PYTHON".equalsIgnoreCase(q.getTopic().getCategory())
+                              || "C".equalsIgnoreCase(q.getTopic().getCategory())
+                              || "DSA".equalsIgnoreCase(q.getTopic().getCategory())
+                              || "DEVELOPER_TOOLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                    .collect(Collectors.toList());
+            if (round3.size() < 5) {
+                round3.addAll(questionRepository.findRandomByCategory("DSA", 5 - round3.size()));
+            }
+            round3.forEach(q -> excluded.add(q.getId()));
+
+            Collection<Long> excl4 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+            round4 = questionRepository.findRandomExcluding(excl4, 5).stream()
+                    .filter(q -> "SOFT_SKILLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                    .collect(Collectors.toList());
+            if (round4.size() < 5) {
+                round4.addAll(questionRepository.findRandomByCategory("SOFT_SKILLS", 5 - round4.size()));
+            }
+
+            round1Name = "Round 1: Quantitative & Logical Aptitude";
+            round2Name = "Round 2: Computer Science Core Theory";
+            round3Name = "Round 3: Coding & Developer Tools";
+            round4Name = "Round 4: Soft Skills & HR Assessment";
+
+        } else if ("COMPANY".equals(type)) {
+            if ("GOOGLE".equals(companyStyle)) {
+                round1 = questionRepository.findRandomByCategory("DSA", 5);
+                
+                Set<Long> excluded = new HashSet<>();
+                round1.forEach(q -> excluded.add(q.getId()));
+                Collection<Long> excl2 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round2 = questionRepository.findRandomExcluding(excl2, 5).stream()
+                        .filter(q -> "DSA".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round2.size() < 5) {
+                    round2.addAll(questionRepository.findRandomExcluding(excl2, 5 - round2.size()));
+                }
+                round2.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl3 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round3 = questionRepository.findRandomExcluding(excl3, 5).stream()
+                        .filter(q -> "OPERATING_SYSTEMS".equalsIgnoreCase(q.getTopic().getCategory())
+                                  || "NETWORKS".equalsIgnoreCase(q.getTopic().getCategory())
+                                  || "DBMS_CONCEPTS".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round3.size() < 5) {
+                    round3.addAll(questionRepository.findRandomByCategory("OPERATING_SYSTEMS", 5 - round3.size()));
+                }
+                round3.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl4 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round4 = questionRepository.findRandomExcluding(excl4, 5).stream()
+                        .filter(q -> "SOFT_SKILLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round4.size() < 5) {
+                    round4.addAll(questionRepository.findRandomByCategory("SOFT_SKILLS", 5 - round4.size()));
+                }
+
+                round1Name = "Round 1: Google Algorithmic Round (DSA)";
+                round2Name = "Round 2: Google Data Structures Round (DSA)";
+                round3Name = "Round 3: Google Systems & Infrastructure";
+                round4Name = "Round 4: Google Googliness & Leadership";
+
+            } else if ("AMAZON".equals(companyStyle)) {
+                round1 = questionRepository.findRandomByCategory("DSA", 5);
+
+                Set<Long> excluded = new HashSet<>();
+                round1.forEach(q -> excluded.add(q.getId()));
+                Collection<Long> excl2 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round2 = questionRepository.findRandomExcluding(excl2, 5).stream()
+                        .filter(q -> "SQL".equalsIgnoreCase(q.getTopic().getCategory()) || "DBMS_CONCEPTS".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round2.size() < 5) {
+                    round2.addAll(questionRepository.findRandomByCategory("SQL", 5 - round2.size()));
+                }
+                round2.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl3 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round3 = questionRepository.findRandomExcluding(excl3, 5).stream()
+                        .filter(q -> "DEVELOPER_TOOLS".equalsIgnoreCase(q.getTopic().getCategory()) || "CS_FUNDAMENTALS".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round3.size() < 5) {
+                    round3.addAll(questionRepository.findRandomByCategory("DEVELOPER_TOOLS", 5 - round3.size()));
+                }
+                round3.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl4 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round4 = questionRepository.findRandomExcluding(excl4, 5).stream()
+                        .filter(q -> "SOFT_SKILLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round4.size() < 5) {
+                    round4.addAll(questionRepository.findRandomByCategory("SOFT_SKILLS", 5 - round4.size()));
+                }
+
+                round1Name = "Round 1: Amazon Coding Assessment (DSA)";
+                round2Name = "Round 2: Amazon Databases & Analytics";
+                round3Name = "Round 3: Amazon Software Design & Tools";
+                round4Name = "Round 4: Amazon Leadership Principles & HR";
+
+            } else {
+                round1 = questionRepository.findRandomByCategory("APTITUDE", 5);
+
+                Set<Long> excluded = new HashSet<>();
+                round1.forEach(q -> excluded.add(q.getId()));
+                Collection<Long> excl2 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round2 = questionRepository.findRandomExcluding(excl2, 5).stream()
+                        .filter(q -> "C".equalsIgnoreCase(q.getTopic().getCategory()) || "JAVA".equalsIgnoreCase(q.getTopic().getCategory()) || "PYTHON".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round2.size() < 5) {
+                    round2.addAll(questionRepository.findRandomByCategory("C", 5 - round2.size()));
+                }
+                round2.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl3 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round3 = questionRepository.findRandomExcluding(excl3, 5).stream()
+                        .filter(q -> "DBMS_CONCEPTS".equalsIgnoreCase(q.getTopic().getCategory()) || "SQL".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round3.size() < 5) {
+                    round3.addAll(questionRepository.findRandomByCategory("DBMS_CONCEPTS", 5 - round3.size()));
+                }
+                round3.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl4 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round4 = questionRepository.findRandomExcluding(excl4, 5).stream()
+                        .filter(q -> "SOFT_SKILLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round4.size() < 5) {
+                    round4.addAll(questionRepository.findRandomByCategory("SOFT_SKILLS", 5 - round4.size()));
+                }
+
+                round1Name = "Round 1: TCS NQT Aptitude Round";
+                round2Name = "Round 2: TCS Programming Fundamentals";
+                round3Name = "Round 3: TCS SQL & DBMS Concepts";
+                round4Name = "Round 4: TCS HR & Communication Round";
+            }
+
+        } else {
+            String language = (!skills.isEmpty()) ? skills.get(0).toUpperCase() : "";
+            if ("JAVA".equals(language) || "PYTHON".equals(language) || "C".equals(language)) {
+                round1 = questionRepository.findRandomByCategory(language, 5);
+                
+                Set<Long> excluded = new HashSet<>();
+                round1.forEach(q -> excluded.add(q.getId()));
+                Collection<Long> excl2 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                
+                round2 = questionRepository.findRandomExcluding(excl2, 5).stream()
+                        .filter(q -> q.getTopic().getCategory().equalsIgnoreCase(language))
+                        .collect(Collectors.toList());
+                if (round2.size() < 5) {
+                    round2.addAll(questionRepository.findRandomExcluding(excl2, 5 - round2.size()));
+                }
+                round2.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl3 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round3 = questionRepository.findRandomExcluding(excl3, 5).stream()
+                        .filter(q -> "DSA".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round3.size() < 5) {
+                    round3.addAll(questionRepository.findRandomByCategory("DSA", 5 - round3.size()));
+                }
+                round3.forEach(q -> excluded.add(q.getId()));
+
+                Collection<Long> excl4 = excluded.isEmpty() ? Collections.singleton(-1L) : excluded;
+                round4 = questionRepository.findRandomExcluding(excl4, 5).stream()
+                        .filter(q -> "DEVELOPER_TOOLS".equalsIgnoreCase(q.getTopic().getCategory()))
+                        .collect(Collectors.toList());
+                if (round4.size() < 5) {
+                    round4.addAll(questionRepository.findRandomByCategory("DEVELOPER_TOOLS", 5 - round4.size()));
+                }
+
+                String langLabel = getCategoryLabel(language);
+                round1Name = "Round 1: " + langLabel + " Fundamentals";
+                round2Name = "Round 2: " + langLabel + " Advanced Concepts";
+                round3Name = "Round 3: " + langLabel + " DSA Applications";
+                round4Name = "Round 4: Technical Tools & IDE Scenarios";
+            } else {
+                round1 = questionRepository.findRandomByCategory("JAVA", 5);
+                round2 = questionRepository.findRandomByCategory("SQL", 5);
+                round3 = questionRepository.findRandomByCategory("DSA", 5);
+                
+                List<Long> excludedIds = new ArrayList<>();
+                round1.forEach(q -> excludedIds.add(q.getId()));
+                round2.forEach(q -> excludedIds.add(q.getId()));
+                round3.forEach(q -> excludedIds.add(q.getId()));
+                Collection<Long> excludeList = excludedIds.isEmpty() ? Collections.singleton(-1L) : excludedIds;
+                round4 = questionRepository.findRandomExcluding(excludeList, 5);
+            }
+        }
 
         List<Question> selectedQuestions = new ArrayList<>();
         selectedQuestions.addAll(round1);
@@ -83,16 +388,26 @@ public class MockInterviewServiceImpl implements MockInterviewService {
         selectedQuestions.addAll(round4);
 
         if (selectedQuestions.size() < 20) {
-            throw new BadRequestException("Not enough questions in database to assemble a 20-question mock interview.");
+            Collection<Long> currentIds = selectedQuestions.stream().map(Question::getId).collect(Collectors.toList());
+            Collection<Long> excludeList = currentIds.isEmpty() ? Collections.singleton(-1L) : currentIds;
+            selectedQuestions.addAll(questionRepository.findRandomExcluding(excludeList, 20 - selectedQuestions.size()));
+            
+            if (selectedQuestions.size() < 20) {
+                throw new BadRequestException("Not enough questions in database to assemble a 20-question mock interview.");
+            }
         }
 
-        // Initialize Mock Interview
         MockInterview interview = MockInterview.builder()
                 .user(user)
+                .interviewType(type)
+                .selectedSkills(String.join(",", skills))
+                .round1Name(round1Name)
+                .round2Name(round2Name)
+                .round3Name(round3Name)
+                .round4Name(round4Name)
                 .build();
         MockInterview savedInterview = mockInterviewRepository.save(interview);
 
-        // Save Answers sequentially
         for (Question q : selectedQuestions) {
             MockInterviewAnswer mia = MockInterviewAnswer.builder()
                     .mockInterview(savedInterview)
@@ -103,7 +418,6 @@ public class MockInterviewServiceImpl implements MockInterviewService {
             mockInterviewAnswerRepository.save(mia);
         }
 
-        // Fetch first question details
         Question firstQ = selectedQuestions.get(0);
         QuizQuestionDto firstQDto = QuizQuestionDto.builder()
                 .id(firstQ.getId())
@@ -141,13 +455,11 @@ public class MockInterviewServiceImpl implements MockInterviewService {
             throw new BadRequestException("This mock interview has already been completed.");
         }
 
-        // Load all answers ordered by ID
         List<MockInterviewAnswer> answers = mockInterviewAnswerRepository.findAll().stream()
                 .filter(a -> a.getMockInterview().getId().equals(interview.getId()))
                 .sorted(Comparator.comparing(MockInterviewAnswer::getId))
                 .collect(Collectors.toList());
 
-        // Update the current question response
         MockInterviewAnswer currentAnswer = answers.stream()
                 .filter(a -> a.getQuestion().getId().equals(request.getQuestionId()))
                 .findFirst()
@@ -158,7 +470,6 @@ public class MockInterviewServiceImpl implements MockInterviewService {
         currentAnswer.setCorrect(selected.equals(currentAnswer.getQuestion().getCorrectAnswer().toUpperCase().trim()));
         mockInterviewAnswerRepository.save(currentAnswer);
 
-        // Find next unanswered question
         MockInterviewAnswer nextAnswer = null;
         int nextIndex = 1;
         for (int i = 0; i < answers.size(); i++) {
@@ -170,11 +481,6 @@ public class MockInterviewServiceImpl implements MockInterviewService {
         }
 
         if (nextAnswer != null) {
-            // Determine current round
-            // 1-5 -> Round 1 (Java)
-            // 6-10 -> Round 2 (SQL)
-            // 11-15 -> Round 3 (DSA)
-            // 16-20 -> Round 4 (Tech Interview)
             int round = 1;
             if (nextIndex > 15) {
                 round = 4;
@@ -183,6 +489,12 @@ public class MockInterviewServiceImpl implements MockInterviewService {
             } else if (nextIndex > 5) {
                 round = 2;
             }
+
+            String roundName = "Mock Round";
+            if (round == 1) roundName = interview.getRound1Name() != null ? interview.getRound1Name() : "Round 1";
+            else if (round == 2) roundName = interview.getRound2Name() != null ? interview.getRound2Name() : "Round 2";
+            else if (round == 3) roundName = interview.getRound3Name() != null ? interview.getRound3Name() : "Round 3";
+            else if (round == 4) roundName = interview.getRound4Name() != null ? interview.getRound4Name() : "Round 4";
 
             Question nq = nextAnswer.getQuestion();
             QuizQuestionDto nextQDto = QuizQuestionDto.builder()
@@ -201,58 +513,69 @@ public class MockInterviewServiceImpl implements MockInterviewService {
             return MockInterviewSubmitResponse.builder()
                     .mockInterviewId(interview.getId())
                     .currentRound(round)
+                    .roundName(roundName)
                     .questionIndex(nextIndex)
                     .nextQuestion(nextQDto)
                     .isFinished(false)
                     .build();
         } else {
-            // All questions answered, grade the mock interview
-            int javaCorrect = 0;
-            int sqlCorrect = 0;
-            int dsaCorrect = 0;
-            int techCorrect = 0;
+            int r1Correct = 0;
+            int r2Correct = 0;
+            int r3Correct = 0;
+            int r4Correct = 0;
 
             for (int i = 0; i < 20; i++) {
                 boolean correct = answers.get(i).isCorrect();
                 if (i < 5) {
-                    if (correct) javaCorrect++;
+                    if (correct) r1Correct++;
                 } else if (i < 10) {
-                    if (correct) sqlCorrect++;
+                    if (correct) r2Correct++;
                 } else if (i < 15) {
-                    if (correct) dsaCorrect++;
+                    if (correct) r3Correct++;
                 } else {
-                    if (correct) techCorrect++;
+                    if (correct) r4Correct++;
                 }
             }
 
-            int totalScore = javaCorrect + sqlCorrect + dsaCorrect + techCorrect;
+            int totalScore = r1Correct + r2Correct + r3Correct + r4Correct;
 
-            interview.setJavaScore(javaCorrect);
-            interview.setSqlScore(sqlCorrect);
-            interview.setDsaScore(dsaCorrect);
-            interview.setTechScore(techCorrect);
+            interview.setJavaScore(r1Correct);
+            interview.setSqlScore(r2Correct);
+            interview.setDsaScore(r3Correct);
+            interview.setTechScore(r4Correct);
             interview.setTotalScore(totalScore);
             interview.setEndTime(LocalDateTime.now());
 
-            // Compile dynamic feedback summary
             StringBuilder feedback = new StringBuilder();
             feedback.append("Successfully completed all rounds! ");
-            if (javaCorrect >= 4) {
-                feedback.append("Exceptional Java skills demonstrated. ");
-            } else if (javaCorrect < 3) {
-                feedback.append("Need to strengthen Java Core and OOP theory. ");
+            
+            String r1Lbl = interview.getRound1Name() != null ? interview.getRound1Name() : "Round 1";
+            String r2Lbl = interview.getRound2Name() != null ? interview.getRound2Name() : "Round 2";
+            String r3Lbl = interview.getRound3Name() != null ? interview.getRound3Name() : "Round 3";
+            String r4Lbl = interview.getRound4Name() != null ? interview.getRound4Name() : "Round 4";
+
+            if (r1Correct >= 4) {
+                feedback.append("Exceptional skills demonstrated in ").append(r1Lbl).append(". ");
+            } else if (r1Correct < 3) {
+                feedback.append("Review foundational concepts in ").append(r1Lbl).append(". ");
             }
 
-            if (sqlCorrect >= 4) {
-                feedback.append("Excellent understanding of SQL Joins and aggregations. ");
-            } else if (sqlCorrect < 3) {
-                feedback.append("Review subqueries and transaction locking modes. ");
+            if (r2Correct >= 4) {
+                feedback.append("Excellent performance in ").append(r2Lbl).append(". ");
+            } else if (r2Correct < 3) {
+                feedback.append("Consider practicing more topics in ").append(r2Lbl).append(". ");
             }
 
-            if (dsaCorrect >= 4) {
-                feedback.append("Strong analytical skills in array and stack manipulation. ");
-            } else {
-                feedback.append("Practice recursive base-case resolutions and tree traversals. ");
+            if (r3Correct >= 4) {
+                feedback.append("Strong analytical skills shown in ").append(r3Lbl).append(". ");
+            } else if (r3Correct < 3) {
+                feedback.append("Strengthen competencies matching ").append(r3Lbl).append(". ");
+            }
+
+            if (r4Correct >= 4) {
+                feedback.append("Excellent execution in ").append(r4Lbl).append(".");
+            } else if (r4Correct < 3) {
+                feedback.append("Improve practical understanding for ").append(r4Lbl).append(".");
             }
 
             interview.setFeedbackSummary(feedback.toString());
@@ -263,6 +586,7 @@ public class MockInterviewServiceImpl implements MockInterviewService {
             return MockInterviewSubmitResponse.builder()
                     .mockInterviewId(savedInterview.getId())
                     .currentRound(4)
+                    .roundName(r4Lbl)
                     .questionIndex(20)
                     .isFinished(true)
                     .scorecard(scorecard)
@@ -293,25 +617,28 @@ public class MockInterviewServiceImpl implements MockInterviewService {
         List<String> weakAreas = new ArrayList<>();
         List<String> recommendations = new ArrayList<>();
 
-        if (m.getJavaScore() >= 4) {
-            strongAreas.add("Java Fundamentals");
-        } else if (m.getJavaScore() < 3) {
-            weakAreas.add("Java Core & OOP");
-            recommendations.add("Review abstract classes vs interfaces & collections hierarchy.");
+        Map<Topic, Integer> topicTotal = new HashMap<>();
+        Map<Topic, Integer> topicCorrect = new HashMap<>();
+
+        for (MockInterviewAnswer a : answers) {
+            Topic topic = a.getQuestion().getTopic();
+            topicTotal.put(topic, topicTotal.getOrDefault(topic, 0) + 1);
+            if (a.isCorrect()) {
+                topicCorrect.put(topic, topicCorrect.getOrDefault(topic, 0) + 1);
+            }
         }
 
-        if (m.getSqlScore() >= 4) {
-            strongAreas.add("SQL Queries");
-        } else if (m.getSqlScore() < 3) {
-            weakAreas.add("Relational Joins & Subqueries");
-            recommendations.add("Solve practice tasks on GROUP BY, HAVING, and correlated subqueries.");
-        }
+        for (Topic topic : topicTotal.keySet()) {
+            int total = topicTotal.get(topic);
+            int correct = topicCorrect.getOrDefault(topic, 0);
+            double accuracy = (double) correct / total * 100.0;
 
-        if (m.getDsaScore() >= 4) {
-            strongAreas.add("Data Structures & Algorithms");
-        } else if (m.getDsaScore() < 3) {
-            weakAreas.add("Recursion & Tree Traversals");
-            recommendations.add("Trace recursive tree heights and practice stack ordering questions.");
+            if (accuracy >= 80.0) {
+                strongAreas.add(topic.getName());
+            } else if (accuracy <= 40.0) {
+                weakAreas.add(topic.getName());
+                recommendations.add("Practice more questions on " + topic.getName() + " to improve your accuracy.");
+            }
         }
 
         if (strongAreas.isEmpty()) {
@@ -328,11 +655,43 @@ public class MockInterviewServiceImpl implements MockInterviewService {
                 .sqlScore(m.getSqlScore())
                 .dsaScore(m.getDsaScore())
                 .techScore(m.getTechScore())
+                .round1Name(m.getRound1Name() != null ? m.getRound1Name() : "Round 1")
+                .round2Name(m.getRound2Name() != null ? m.getRound2Name() : "Round 2")
+                .round3Name(m.getRound3Name() != null ? m.getRound3Name() : "Round 3")
+                .round4Name(m.getRound4Name() != null ? m.getRound4Name() : "Round 4")
+                .interviewType(m.getInterviewType() != null ? m.getInterviewType() : "TECHNICAL")
                 .feedbackSummary(m.getFeedbackSummary())
                 .strongAreas(strongAreas)
                 .weakAreas(weakAreas)
                 .recommendations(recommendations)
                 .build();
+    }
+
+    private String getCategoryLabel(String category) {
+        if (category == null) return "";
+        switch (category.toUpperCase()) {
+            case "JAVA": return "Java Core";
+            case "SQL": return "Database & SQL";
+            case "DSA": return "Algorithms (DSA)";
+            case "C": return "C Programming";
+            case "PYTHON": return "Python Programming";
+            case "FULLSTACK": return "Full Stack Web";
+            case "DATA_ANALYTICS": return "Data Analytics";
+            case "DATA_SCIENCE": return "Data Science";
+            case "SOFTWARE_TESTING": return "Software Testing";
+            case "AUTOMATION_TESTING": return "Automation Testing";
+            case "GIT_GITHUB": return "Git & GitHub";
+            case "DEVOPS": return "DevOps & CI/CD";
+            case "APTITUDE": return "Aptitude & Logic";
+            case "AI_TOOLS": return "AI & AI Tools";
+            case "NETWORKS": return "Computer Networks";
+            case "OPERATING_SYSTEMS": return "Operating Systems";
+            case "DBMS_CONCEPTS": return "DBMS Concepts";
+            case "CS_FUNDAMENTALS": return "CS Fundamentals";
+            case "SOFT_SKILLS": return "Soft Skills & HR";
+            case "DEVELOPER_TOOLS": return "Tools & Env";
+            default: return category;
+        }
     }
 
     @Override
@@ -385,10 +744,53 @@ public class MockInterviewServiceImpl implements MockInterviewService {
 
         double finalPercentage = count > 0 ? (readinessSum / count) : 0.0;
 
+        // Calculate average quiz accuracy on these specific job role topics
+        List<UserTopicProgress> progresses = userTopicProgressRepository.findByUserId(userId);
+        Map<Long, Double> topicQuizAccuracyMap = progresses.stream()
+                .collect(Collectors.toMap(p -> p.getTopic().getId(), UserTopicProgress::getAccuracyPercentage));
+
+        double quizAccSum = 0;
+        int quizAccCount = 0;
+        for (JobRoleSkill rs : requiredSkills) {
+            Long topicId = rs.getTopic().getId();
+            if (topicQuizAccuracyMap.containsKey(topicId)) {
+                quizAccSum += topicQuizAccuracyMap.get(topicId);
+                quizAccCount++;
+            }
+        }
+        double avgQuizAccuracy = quizAccCount > 0 ? (quizAccSum / quizAccCount) : 0.0;
+
+        // Calculate average mock interview accuracy on these specific job role topics
+        List<MockInterview> userMocks = mockInterviewRepository.findByUserId(userId);
+        int correctMockAnswers = 0;
+        int totalMockAnswers = 0;
+        Set<Long> roleTopicIds = requiredSkills.stream()
+                .map(rs -> rs.getTopic().getId())
+                .collect(Collectors.toSet());
+
+        for (MockInterview m : userMocks) {
+            if (m.getEndTime() != null) {
+                List<MockInterviewAnswer> answers = mockInterviewAnswerRepository.findAll().stream()
+                        .filter(a -> a.getMockInterview().getId().equals(m.getId()))
+                        .collect(Collectors.toList());
+                for (MockInterviewAnswer a : answers) {
+                    if (roleTopicIds.contains(a.getQuestion().getTopic().getId())) {
+                        totalMockAnswers++;
+                        if (a.isCorrect()) {
+                            correctMockAnswers++;
+                        }
+                    }
+                }
+            }
+        }
+        double avgMockAccuracy = totalMockAnswers > 0 ? ((double) correctMockAnswers / totalMockAnswers * 100.0) : 0.0;
+
         return JobRoleReadinessDto.builder()
                 .jobRoleId(role.getId())
                 .jobRoleName(role.getName())
                 .readinessPercentage(Math.round(finalPercentage * 10.0) / 10.0)
+                .avgQuizAccuracy(Math.round(avgQuizAccuracy * 10.0) / 10.0)
+                .avgMockAccuracy(Math.round(avgMockAccuracy * 10.0) / 10.0)
                 .skillComparison(comparison)
                 .build();
     }

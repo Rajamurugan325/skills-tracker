@@ -135,6 +135,90 @@ const Quiz = () => {
               <p>HTML, CSS, React, Express, REST APIs, Databases</p>
               <span className="go-btn"><Play size={14} /> Start</span>
             </button>
+
+            <button onClick={() => startQuiz('DATA_ANALYTICS')} className="category-card glass-panel">
+              <span className="code-lang">Data Analytics</span>
+              <p>Excel, Power Query/Pivot, DAX, Visualization, Statistics, Power BI</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('DATA_SCIENCE')} className="category-card glass-panel">
+              <span className="code-lang">Data Science</span>
+              <p>NumPy, Pandas, EDA, Feature Engineering, Machine Learning</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('SOFTWARE_TESTING')} className="category-card glass-panel">
+              <span className="code-lang">Software Testing</span>
+              <p>Manual Testing, SDLC/STLC, Test Cases, Bug Reporting, API Testing</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('AUTOMATION_TESTING')} className="category-card glass-panel">
+              <span className="code-lang">Automation Testing</span>
+              <p>Selenium WebDriver, Java, TestNG, Frameworks, POM, XPath/CSS</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('GIT_GITHUB')} className="category-card glass-panel">
+              <span className="code-lang">Git & GitHub</span>
+              <p>Repository Management, Branching/Merging, Pull Requests, Actions</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('DEVOPS')} className="category-card glass-panel">
+              <span className="code-lang">DevOps & CI/CD</span>
+              <p>Jenkins Pipelines, Maven, Webhooks, Docker, CI/CD Workflows</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('APTITUDE')} className="category-card glass-panel">
+              <span className="code-lang">Aptitude & Logic</span>
+              <p>Quantitative Aptitude, Logical Reasoning, Verbal Ability, Probability</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('AI_TOOLS')} className="category-card glass-panel">
+              <span className="code-lang">AI & AI Tools</span>
+              <p>Generative AI, Prompt Engineering, Coding Assistants, Automation</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('NETWORKS')} className="category-card glass-panel">
+              <span className="code-lang">Computer Networks</span>
+              <p>OSI & TCP/IP Models, IP Addressing, DNS, HTTP/HTTPS, Routing</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('OPERATING_SYSTEMS')} className="category-card glass-panel">
+              <span className="code-lang">Operating Systems</span>
+              <p>Processes, Threads, CPU Scheduling, Deadlocks, Memory Management</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('DBMS_CONCEPTS')} className="category-card glass-panel">
+              <span className="code-lang">DBMS Concepts</span>
+              <p>ER Model, Normalization, ACID, Indexing, Concurrency, Triggers</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('CS_FUNDAMENTALS')} className="category-card glass-panel">
+              <span className="code-lang">CS Fundamentals</span>
+              <p>OOPs, Compiler vs Interpreter, Software Eng, System Design</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('SOFT_SKILLS')} className="category-card glass-panel">
+              <span className="code-lang">Soft Skills & HR</span>
+              <p>HR Questions, Communication, Teamwork, Behavioral Scenarios</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
+
+            <button onClick={() => startQuiz('DEVELOPER_TOOLS')} className="category-card glass-panel">
+              <span className="code-lang">Tools & Env</span>
+              <p>VS Code, Postman, Docker, Git, Chrome DevTools, IntelliJ, Maven</p>
+              <span className="go-btn"><Play size={14} /> Start</span>
+            </button>
           </div>
 
           <div className="or-divider">OR</div>

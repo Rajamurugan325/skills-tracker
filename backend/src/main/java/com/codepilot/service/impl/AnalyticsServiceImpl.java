@@ -121,13 +121,20 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         double dsaSum = 0;
         int dsaCount = 0;
 
+        double techSum = 0.0;
+        int techCategoryCount = 0;
+
         List<String> strongAreas = new ArrayList<>();
         List<String> weakAreas = new ArrayList<>();
         List<String> recommendedTopics = new ArrayList<>();
 
+        Map<String, List<Double>> categoryAccuracies = new HashMap<>();
+
         for (UserTopicProgress p : progresses) {
             String cat = p.getTopic().getCategory().toUpperCase();
             double acc = p.getAccuracyPercentage();
+
+            categoryAccuracies.computeIfAbsent(cat, k -> new ArrayList<>()).add(acc);
 
             if ("JAVA".equals(cat)) {
                 javaSum += acc;
@@ -152,6 +159,16 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         double javaScore = javaCount > 0 ? (javaSum / javaCount) : 0.0;
         double sqlScore = sqlCount > 0 ? (sqlSum / sqlCount) : 0.0;
         double dsaScore = dsaCount > 0 ? (dsaSum / dsaCount) : 0.0;
+
+        for (Map.Entry<String, List<Double>> entry : categoryAccuracies.entrySet()) {
+            double avgAcc = entry.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+            if (!"SOFT_SKILLS".equals(entry.getKey()) && !"APTITUDE".equals(entry.getKey())) {
+                techSum += avgAcc;
+                techCategoryCount++;
+            }
+        }
+
+        double overallTechScore = techCategoryCount > 0 ? (techSum / techCategoryCount) : 0.0;
 
         List<MockInterview> mocks = mockInterviewRepository.findByUserId(userId);
         double mockSum = 0;
@@ -181,7 +198,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         int activeDays = activeDates.size();
         double consistencyScore = Math.min(100.0, (activeDays / 7.0) * 100.0);
 
-        double readiness = (javaScore * 0.25) + (sqlScore * 0.20) + (dsaScore * 0.30) + (mockInterviewScore * 0.20) + (consistencyScore * 0.05);
+        double readiness = (overallTechScore * 0.75) + (mockInterviewScore * 0.20) + (consistencyScore * 0.05);
 
         if (strongAreas.isEmpty()) {
             strongAreas.add("No strong areas identified yet. Practice more to unlock in strengths!");

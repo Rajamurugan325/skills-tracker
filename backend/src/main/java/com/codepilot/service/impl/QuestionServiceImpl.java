@@ -84,12 +84,11 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional(readOnly = true)
     public QuestionDto getRandomQuestion() {
-        List<Question> questions = questionRepository.findAll();
+        List<Question> questions = questionRepository.findRandom(1);
         if (questions.isEmpty()) {
             throw new ResourceNotFoundException("No questions found in the database");
         }
-        int randomIndex = (int) (Math.random() * questions.size());
-        return mapToDto(questions.get(randomIndex));
+        return mapToDto(questions.get(0));
     }
 
     private QuestionDto mapToDto(Question question) {

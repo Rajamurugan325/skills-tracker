@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: codepilot-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: codepilot
+      MYSQL_ROOT_PASSWORD: raja2006
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: codepilot-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/codepilot?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: raja2006
+      JWT_SECRET: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVwaWxvdC1jYW5kaWRhdGUtcG9ydGZvbGlvLXByb2plY3Qtd2hpY2gtbXVzdC1iZS0yNTYtYml0cy1sb25n
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=http://localhost:8080
+    container_name: codepilot-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

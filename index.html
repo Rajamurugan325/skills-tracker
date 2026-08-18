@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rajamurugan M | Portfolio - Software Engineer & QA Automation</title>
+    
+    <!-- SEO Optimization -->
+    <meta name="description" content="Portfolio of Rajamurugan M, Computer Science Engineering student specializing in Full-Stack Web Development (React.js, Node.js) and QA / CI-CD Automation.">
+    <meta name="keywords" content="Rajamurugan M, Rajamurugan, Rajamurugan325, portfolio, Software Engineer, Full Stack, QA Automation, Java, React, Node.js, Selenium, Jenkins, Salem, Tamil Nadu">
+    <meta name="author" content="Rajamurugan M">
+    
+    <!-- Open Graph Metadata -->
+    <meta property="og:title" content="Rajamurugan M | Portfolio">
+    <meta property="og:description" content="Portfolio of Rajamurugan M, final-year Computer Science Engineering student specializing in Java, Full-Stack Web Development, and QA Automation.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/Rajamurugan325">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <header class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <span class="gradient-text">Rajamurugan</span><span class="logo-dot">.</span>
+            </a>
+            <nav class="nav-menu" id="nav-menu">
+                <ul>
+                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#skills" class="nav-link">Skills</a></li>
+                    <li><a href="#projects" class="nav-link">Projects</a></li>
+                    <li><a href="#experience" class="nav-link">Experience</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </nav>
+            <div class="nav-actions">
+                <a href="assets/resume.pdf" target="_blank" class="btn btn-outline btn-sm">Resume</a>
+                <a href="#contact" class="btn btn-primary btn-sm">Hire Me</a>
+                <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
+                    <i data-lucide="menu" class="icon-menu"></i>
+                    <i data-lucide="x" class="icon-close"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-bg-glow"></div>
+            <div class="container hero-container">
+                <div class="hero-content">
+                    <div class="badge fade-in">Available for Roles</div>
+                    <h1 class="fade-in">Hi, I'm <span class="gradient-text">Rajamurugan M</span></h1>
+                    <h2 class="dynamic-subtitle-container fade-in">
+                        I am a <span id="dynamic-subtitle" class="accent-text"></span><span class="cursor-blink">|</span>
+                    </h2>
+                    <p class="hero-desc fade-in">
+                        Final-year Computer Science Engineering student with hands-on experience building full-stack web applications and creating automated CI/CD testing pipelines. Strong in Java, OOP, and modern web tech.
+                    </p>
+                    <div class="hero-buttons fade-in">
+                        <a href="#projects" class="btn btn-primary">
+                            <span>View Projects</span>
+                            <i data-lucide="arrow-right"></i>
+                        </a>
+                        <a href="assets/resume.pdf" target="_blank" class="btn btn-outline">
+                            <span>Resume</span>
+                            <i data-lucide="download"></i>
+                        </a>
+                        <a href="#contact" class="btn btn-outline">
+                            <span>Contact Me</span>
+                        </a>
+                    </div>
+                    <div class="hero-socials fade-in">
+                        <span class="social-label">Connect:</span>
+                        <div class="social-links">
+                            <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" aria-label="GitHub Profile">
+                                <i data-lucide="github"></i>
+                            </a>
+                            <a href="https://linkedin.com/in/rajamurugan-m-0a101b2a6" target="_blank" rel="noopener" aria-label="LinkedIn Profile">
+                                <i data-lucide="linkedin"></i>
+                            </a>
+                            <a href="mailto:rajamurugan.cse27@gmail.com" aria-label="Send Email">
+                                <i data-lucide="mail"></i>
+                            </a>
+                            <a href="tel:6383558147" aria-label="Call Phone">
+                                <i data-lucide="phone"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual fade-in">
+                    <div class="avatar-wrapper">
+                        <div class="avatar-ring-outer"></div>
+                        <div class="avatar-ring-inner"></div>
+                        <div class="avatar-box">
+                            <img src="assets/avatar.png" alt="Rajamurugan M Avatar" class="avatar-img">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <a href="#about" aria-label="Scroll Down">
+                    <div class="mouse">
+                        <div class="wheel"></div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- About Me Section -->
+        <section id="about" class="about-section scroll-reveal">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <span class="subtitle">Personal Info</span>
+                    <h2 class="section-title">About Me</h2>
+                    <div class="title-underline"></div>
+                </div>
+
+                <div class="about-grid">
+                    <div class="about-info">
+                        <h3>Passionate Developer & QA Practitioner</h3>
+                        <p>
+                            I am currently pursuing my <strong>Bachelor of Engineering in Computer Science and Engineering</strong> at <strong>Knowledge Institute of Technology, Salem</strong> (2023 - 2027). Throughout my studies, I have maintained a strong focus on practical software construction and quality engineering.
+                        </p>
+                        <p>
+                            With a solid foundation in Object-Oriented Programming (OOP) and Data Structures in Java, I love building applications that solve real-world problems. I've engineered full-stack web platforms and set up end-to-end CI/CD testing pipelines, bridging the gap between developers and deployment.
+                        </p>
+                        
+                        <div class="info-highlights">
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i data-lucide="graduation-cap"></i></div>
+                                <div class="highlight-content">
+                                    <h4>Education</h4>
+                                    <p>KIOT Salem (CGPA: 7.2/10)</p>
+                                </div>
+                            </div>
+                            <div class="highlight-item">
+                                <div class="highlight-icon"><i data-lucide="globe"></i></div>
+                                <div class="highlight-content">
+                                    <h4>Languages</h4>
+                                    <p>English, Tamil, Telugu</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-tabs">
+                        <div class="tabs-header">
+                            <button class="tab-btn active" data-tab="education">Education</button>
+                            <button class="tab-btn" data-tab="background">Certifications & Hackathons</button>
+                        </div>
+                        
+                        <div class="tabs-content">
+                            <!-- Tab: Education -->
+                            <div class="tab-pane active" id="education">
+                                <div class="timeline-edu">
+                                    <div class="edu-item">
+                                        <div class="edu-dot"></div>
+                                        <div class="edu-header">
+                                            <span class="edu-duration">2023 - 2027</span>
+                                            <h4>Bachelor of Engineering (B.E.)</h4>
+                                            <h5>Computer Science and Engineering</h5>
+                                        </div>
+                                        <p class="edu-institution">Knowledge Institute of Technology, Salem</p>
+                                        <div class="edu-meta">
+                                            <span class="badge">CGPA: 7.2 / 10 (till 6th Semester)</span>
+                                        </div>
+                                    </div>
+                                    <div class="edu-item">
+                                        <div class="edu-dot"></div>
+                                        <div class="edu-header">
+                                            <span class="edu-duration">2022 - 2023</span>
+                                            <h4>Higher Secondary School (Class XII)</h4>
+                                        </div>
+                                        <p class="edu-institution">Vedhha Vikass Matriculation Higher Secondary School</p>
+                                        <div class="edu-meta">
+                                            <span class="badge">Percentage: 68.5%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab: Certs & Achievements -->
+                            <div class="tab-pane" id="background">
+                                <ul class="list-achievements">
+                                    <li>
+                                        <div class="ach-icon"><i data-lucide="award"></i></div>
+                                        <div class="ach-text">
+                                            <strong>SQL Mastery with MySQL – LearnZConnect</strong>
+                                            <span>Hands-on experience in SQL, MySQL database design, CRUD operations, joins, subqueries, aggregate functions, and data manipulation.</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="ach-icon"><i data-lucide="bar-chart-3"></i></div>
+                                        <div class="ach-text">
+                                            <strong>Power BI Micro Course – Skill Course</strong>
+                                            <span>Completed course covering business data analytics, report building, and interactive visualization dashboards. (Cert ID: SC-5F32FE8129 | Date: 20/03/2026)</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="ach-icon"><i data-lucide="palette"></i></div>
+                                        <div class="ach-text">
+                                            <strong>UI/UX Design Workshop (2-Day)</strong>
+                                            <span>Learned UI/UX design principles, user research, wireframing, prototyping, design systems, and Figma for creating user-centered interfaces.</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="ach-icon"><i data-lucide="zap"></i></div>
+                                        <div class="ach-text">
+                                            <strong>Codesangram Hackathon</strong>
+                                            <span>Alliance University — Participated and built a working full-stack prototype under strict time constraints.</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Skills Section -->
+        <section id="skills" class="skills-section scroll-reveal">
+            <div class="skills-bg-glow"></div>
+            <div class="container">
+                <div class="section-title-wrapper align-center">
+                    <span class="subtitle">My Arsenal</span>
+                    <h2 class="section-title">Technical Skills</h2>
+                    <div class="title-underline center"></div>
+                </div>
+
+                <div class="skills-grid">
+                    <!-- Programming Languages -->
+                    <div class="skill-category-card glass-card">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="code-2"></i>
+                        </div>
+                        <h3>Programming Languages</h3>
+                        <div class="skills-list">
+                            <div class="skill-tag">
+                                <span>Java</span>
+                                <div class="skill-level" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Web Technologies -->
+                    <div class="skill-category-card glass-card">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="layout"></i>
+                        </div>
+                        <h3>Web Technologies</h3>
+                        <div class="skills-list">
+                            <div class="skill-tag">
+                                <span>JavaScript</span>
+                                <div class="skill-level" style="width: 80%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>React.js</span>
+                                <div class="skill-level" style="width: 80%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>Node.js</span>
+                                <div class="skill-level" style="width: 75%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>HTML5 / CSS3</span>
+                                <div class="skill-level" style="width: 90%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>Express.js</span>
+                                <div class="skill-level" style="width: 70%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Databases & Analytics -->
+                    <div class="skill-category-card glass-card">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="database"></i>
+                        </div>
+                        <h3>Databases & Analytics</h3>
+                        <div class="skills-list">
+                            <div class="skill-tag">
+                                <span>MySQL</span>
+                                <div class="skill-level" style="width: 80%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>Power BI</span>
+                                <div class="skill-level" style="width: 70%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Software Testing & Automation -->
+                    <div class="skill-category-card glass-card">
+                        <div class="card-icon-wrapper">
+                            <i data-lucide="shield-check"></i>
+                        </div>
+                        <h3>QA & Automation</h3>
+                        <div class="skills-list">
+                            <div class="skill-tag">
+                                <span>Selenium WebDriver</span>
+                                <div class="skill-level" style="width: 85%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>TestNG / JUnit</span>
+                                <div class="skill-level" style="width: 80%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>Maven Build Tool</span>
+                                <div class="skill-level" style="width: 75%;"></div>
+                            </div>
+                            <div class="skill-tag">
+                                <span>Manual Testing</span>
+                                <div class="skill-level" style="width: 80%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Showcase Section -->
+        <section id="projects" class="projects-section scroll-reveal">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <span class="subtitle">Portfolio Showcase</span>
+                    <h2 class="section-title">Featured Projects</h2>
+                    <div class="title-underline"></div>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="filter-wrapper">
+                    <button class="filter-btn active" data-filter="all">All Projects</button>
+                    <button class="filter-btn" data-filter="web">Web & Mobile Apps</button>
+                    <button class="filter-btn" data-filter="testing">Automation & Testing</button>
+                </div>
+
+                <!-- Projects Grid -->
+                <div class="projects-grid">
+                    <!-- Project 1: CODEPILOT -->
+                    <article class="project-card glass-card" data-category="web">
+                        <div class="project-image-box">
+                            <div class="project-image-fallback tech-pattern-1">
+                                <i data-lucide="terminal" class="fallback-icon"></i>
+                            </div>
+                            <div class="project-overlay">
+                                <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-action-btn" aria-label="View Source on GitHub">
+                                    <i data-lucide="github"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="project-details">
+                            <div class="project-tags">
+                                <span class="tag-pill">Java 21</span>
+                                <span class="tag-pill">Spring Boot</span>
+                                <span class="tag-pill">React.js</span>
+                                <span class="tag-pill">MySQL</span>
+                                <span class="tag-pill">JWT</span>
+                            </div>
+                            <h3>CODEPILOT – Adaptive Technical Assessment Platform</h3>
+                            <p>
+                                A full-stack technical assessment platform measuring interview readiness across Java, SQL, and DSA roles with adaptive engines and analytics.
+                            </p>
+                            <ul class="project-highlights">
+                                <li>Adaptive quiz engine dynamically scaling question difficulties</li>
+                                <li>JWT security & role-based access control with Spring Security</li>
+                                <li>Multi-round mock interviews & weighted readiness-scoring</li>
+                                <li>Normalized database & interactive react analytics dashboards</li>
+                            </ul>
+                            <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-link">
+                                <span>Explore Code</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Project 2: BETA -->
+                    <article class="project-card glass-card" data-category="web">
+                        <div class="project-image-box">
+                            <div class="project-image-fallback tech-pattern-2">
+                                <i data-lucide="file-text" class="fallback-icon"></i>
+                            </div>
+                            <div class="project-overlay">
+                                <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-action-btn" aria-label="View Source on GitHub">
+                                    <i data-lucide="github"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="project-details">
+                            <div class="project-tags">
+                                <span class="tag-pill">Node.js</span>
+                                <span class="tag-pill">Express.js</span>
+                                <span class="tag-pill">SQLite</span>
+                                <span class="tag-pill">JavaScript</span>
+                                <span class="tag-pill">JWT</span>
+                            </div>
+                            <h3>BETA – College Assignment Submission System</h3>
+                            <p>
+                                A role-based assignment management platform for students and staff with approval workflows, submission tracking, and dashboards.
+                            </p>
+                            <ul class="project-highlights">
+                                <li>Student/staff JWT authentication and route protection</li>
+                                <li>Submission tracking: approval, rejection, and resubmissions</li>
+                                <li>Excel/CSV bulk student importer & notification alerts</li>
+                                <li>Fully normalized REST APIs with SQLite integration</li>
+                            </ul>
+                            <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-link">
+                                <span>Explore Code</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Project 3: SAFEWORK -->
+                    <article class="project-card glass-card" data-category="web">
+                        <div class="project-image-box">
+                            <div class="project-image-fallback tech-pattern-3">
+                                <i data-lucide="smartphone" class="fallback-icon"></i>
+                            </div>
+                            <div class="project-overlay">
+                                <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-action-btn" aria-label="View Source on GitHub">
+                                    <i data-lucide="github"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="project-details">
+                            <div class="project-tags">
+                                <span class="tag-pill">React Native</span>
+                                <span class="tag-pill">Expo</span>
+                                <span class="tag-pill">JavaScript</span>
+                                <span class="tag-pill">SQLite</span>
+                                <span class="tag-pill">GPS</span>
+                            </div>
+                            <h3>SAFEWORK – Safety & Emergency Mobile App</h3>
+                            <p>
+                                A mobile safety application providing instant SOS support, location sharing, and offline evidence recording.
+                            </p>
+                            <ul class="project-highlights">
+                                <li>GPS-based SOS sharing user's exact coordinates</li>
+                                <li>In-app camera & audio recording for complaint evidence</li>
+                                <li>Local SQLite database integration for offline reliability</li>
+                                <li>Fully responsive interface utilizing native iOS/Android components</li>
+                            </ul>
+                            <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-link">
+                                <span>Explore Code</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Project 4: Automation Framework -->
+                    <article class="project-card glass-card" data-category="testing">
+                        <div class="project-image-box">
+                            <div class="project-image-fallback tech-pattern-4">
+                                <i data-lucide="shopping-cart" class="fallback-icon"></i>
+                            </div>
+                            <div class="project-overlay">
+                                <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-action-btn" aria-label="View Source on GitHub">
+                                    <i data-lucide="github"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="project-details">
+                            <div class="project-tags">
+                                <span class="tag-pill">Java</span>
+                                <span class="tag-pill">Selenium</span>
+                                <span class="tag-pill">TestNG</span>
+                                <span class="tag-pill">Maven</span>
+                                <span class="tag-pill">WebDriverManager</span>
+                            </div>
+                            <h3>E-Commerce Automation Testing Framework</h3>
+                            <p>
+                                An automated regression testing framework targeting standard e-commerce user workflows with automated drivers and build logs.
+                            </p>
+                            <ul class="project-highlights">
+                                <li>Automated critical flows: Login, Cart, Products, Checkout</li>
+                                <li>Modular TestNG browser test suites and validation assertions</li>
+                                <li>Integrated WebDriverManager for cross-browser driver loading</li>
+                                <li>Structured testing logs & HTML test execution summaries</li>
+                            </ul>
+                            <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener" class="project-link">
+                                <span>Explore Code</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience & Internships Section -->
+        <section id="experience" class="experience-section scroll-reveal">
+            <div class="experience-bg-glow"></div>
+            <div class="container">
+                <div class="section-title-wrapper align-center">
+                    <span class="subtitle">Professional Growth</span>
+                    <h2 class="section-title">Internships & Training</h2>
+                    <div class="title-underline center"></div>
+                </div>
+
+                <div class="timeline-wrapper">
+                    <!-- Timeline Line -->
+                    <div class="timeline-line"></div>
+
+                    <!-- Experience Item 1 -->
+                    <div class="timeline-item left-item">
+                        <div class="timeline-indicator">
+                            <i data-lucide="briefcase"></i>
+                        </div>
+                        <div class="timeline-content glass-card">
+                            <span class="timeline-date">Dec 2024 – Jan 2025</span>
+                            <h3>Frontend Development Intern</h3>
+                            <h4 class="company-name">STACK QUEUE <span class="badge badge-duration">2 Weeks</span></h4>
+                            <p>
+                                Developed responsive frontend user interfaces. Implemented clean web components using standard HTML, CSS, and JavaScript, ensuring cross-browser styling alignment and design mockups conformity.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Experience Item 2 -->
+                    <div class="timeline-item right-item">
+                        <div class="timeline-indicator">
+                            <i data-lucide="briefcase"></i>
+                        </div>
+                        <div class="timeline-content glass-card">
+                            <span class="timeline-date">Jul 2024</span>
+                            <h3>Web Development Intern</h3>
+                            <h4 class="company-name">LiTZ Private Limited <span class="badge badge-duration">1 Week</span></h4>
+                            <p>
+                                Assisted in the construction and maintenance of client web applications inside a collaborative workspace. Gained insights into team repository workflows and code maintenance procedures.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Experience Item 3 -->
+                    <div class="timeline-item left-item">
+                        <div class="timeline-indicator">
+                            <i data-lucide="briefcase"></i>
+                        </div>
+                        <div class="timeline-content glass-card">
+                            <span class="timeline-date">Feb 2024</span>
+                            <h3>Web Development Intern</h3>
+                            <h4 class="company-name">IPCS Global Solution Pvt. Ltd. <span class="badge badge-duration">1 Week</span></h4>
+                            <p>
+                                Contributed to building responsive web components and worked on full-stack data layouts using basic relational query patterns, focusing on site responsiveness.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section scroll-reveal">
+            <div class="container">
+                <div class="section-title-wrapper">
+                    <span class="subtitle">Let's Connect</span>
+                    <h2 class="section-title">Get In Touch</h2>
+                    <div class="title-underline"></div>
+                </div>
+
+                <div class="contact-grid">
+                    <!-- Contact Form Card -->
+                    <div class="contact-form-wrapper glass-card">
+                        <h3>Send a Message</h3>
+                        <form id="contact-form" novalidate>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="name" required placeholder=" ">
+                                    <label for="name">Your Name</label>
+                                    <span class="error-msg" id="name-error">Please enter your name</span>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" id="email" required placeholder=" ">
+                                    <label for="email">Your Email</label>
+                                    <span class="error-msg" id="email-error">Please enter a valid email address</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="text" id="subject" required placeholder=" ">
+                                <label for="subject">Subject</label>
+                                <span class="error-msg" id="subject-error">Please enter a subject</span>
+                            </div>
+
+                            <div class="form-group">
+                                <textarea id="message" rows="5" required placeholder=" "></textarea>
+                                <label for="message">Your Message</label>
+                                <span class="error-msg" id="message-error">Please write a message</span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <span class="btn-text">Send Message</span>
+                                <i data-lucide="send" class="btn-icon"></i>
+                                <span class="btn-spinner hidden"></span>
+                            </button>
+                        </form>
+
+                        <!-- Success Popup Modal Inside Card -->
+                        <div class="form-success-overlay id-hidden" id="form-success">
+                            <div class="success-message">
+                                <div class="success-icon">
+                                    <i data-lucide="check-circle-2"></i>
+                                </div>
+                                <h3>Thank you, <span id="success-name"></span>!</h3>
+                                <p>Your message has been sent successfully. Rajamurugan will get back to you shortly.</p>
+                                <button type="button" class="btn btn-primary btn-sm" id="close-success-btn">Dismiss</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Details -->
+                    <div class="contact-info-wrapper">
+                        <div class="contact-info-card glass-card">
+                            <div class="info-card-item">
+                                <div class="info-card-icon">
+                                    <i data-lucide="mail"></i>
+                                </div>
+                                <div class="info-card-details">
+                                    <span>Email Me</span>
+                                    <a href="mailto:rajamurugan.cse27@gmail.com">rajamurugan.cse27@gmail.com</a>
+                                </div>
+                            </div>
+
+                            <div class="info-card-item">
+                                <div class="info-card-icon">
+                                    <i data-lucide="phone"></i>
+                                </div>
+                                <div class="info-card-details">
+                                    <span>Call Me</span>
+                                    <a href="tel:6383558147">+91 63835 58147</a>
+                                </div>
+                            </div>
+
+                            <div class="info-card-item">
+                                <div class="info-card-icon">
+                                    <i data-lucide="map-pin"></i>
+                                </div>
+                                <div class="info-card-details">
+                                    <span>Location</span>
+                                    <p>Salem, Tamil Nadu, India</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mini Map Banner / Visual Aesthetic -->
+                        <div class="location-aesthetic glass-card">
+                            <div class="aesthetic-circles">
+                                <div class="circle c1"></div>
+                                <div class="circle c2"></div>
+                                <div class="circle c3"></div>
+                            </div>
+                            <div class="aesthetic-inner">
+                                <i data-lucide="compass" class="compass-icon"></i>
+                                <span>Salem, Tamil Nadu</span>
+                                <p>Ready for on-site, remote, or hybrid roles.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <p class="copyright">&copy; 2026 Rajamurugan M. Built with Passion.</p>
+            <div class="footer-links">
+                <a href="https://github.com/Rajamurugan325" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://linkedin.com/in/rajamurugan-m-0a101b2a6" target="_blank" rel="noopener">LinkedIn</a>
+            </div>
+            <button class="scroll-to-top" id="scroll-to-top" aria-label="Scroll to top">
+                <i data-lucide="arrow-up"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

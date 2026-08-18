@@ -3,6 +3,15 @@
    Interactive transitions, scroll animation spy, project filter, form handlers
    ========================================================================== */
 
+// Register PWA Service Worker for Android & PC installability
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker registered successfully'))
+            .catch(err => console.error('Service Worker registration failed:', err));
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Lucide Icons
     lucide.createIcons();

@@ -1,0 +1,35 @@
+services:
+  # Spring Boot Backend Web Service
+  - type: web
+    name: codepilot-backend
+    env: docker
+    plan: free
+    rootDir: backend
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+        description: "The JDBC connection string to your online MySQL database (e.g. Clever Cloud or Aiven)"
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+        description: "MySQL database username"
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+        description: "MySQL database password"
+      - key: JWT_SECRET
+        value: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVwaWxvdC1jYW5kaWRhdGUtcG9ydGZvbGlvLXByb2plY3Qtd2hpY2gtbXVzdC1iZS0yNTYtYml0cy1sb25n
+
+  # React Frontend Static Site
+  - type: web
+    name: codepilot-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: codepilot-backend
+          type: web
+          property: host

@@ -1614,8 +1614,9 @@ section {
         right: -100%;
         width: 280px;
         height: 100vh;
-        background: #0e1017;
+        background: var(--bg-surface);
         border-left: 1px solid var(--border-glass);
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.05);
         padding: 8rem 2.5rem 2rem;
         transition: right 0.4s var(--ease-smooth);
         z-index: 1050;
@@ -1715,5 +1716,98 @@ section {
     .form-row {
         grid-template-columns: 1fr;
         gap: 0;
+    }
+}
+
+/* Extra Small Devices - Android & Portrait Mobile Views */
+@media (max-width: 480px) {
+    section {
+        padding: 4.5rem 0 3rem;
+    }
+
+    .section-title-wrapper {
+        margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 2.1rem;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+        line-height: 1.2;
+    }
+
+    .dynamic-subtitle-container {
+        font-size: 1.4rem;
+        min-height: 2.2rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .hero-desc {
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.8rem;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .avatar-wrapper {
+        width: 220px;
+        height: 220px;
+    }
+
+    .about-tabs {
+        padding: 1.5rem 1.2rem;
+    }
+
+    .tabs-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .tab-btn {
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem 1rem;
+    }
+
+    /* Timeline spacing compaction for small phone viewports */
+    .timeline-line {
+        left: 15px;
+    }
+
+    .timeline-item {
+        padding-left: 2.8rem;
+        margin-bottom: 2rem;
+    }
+
+    .left-item .timeline-indicator,
+    .right-item .timeline-indicator {
+        left: -3px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .timeline-content {
+        padding: 1.5rem 1.2rem;
+    }
+
+    .contact-form-wrapper {
+        padding: 2rem 1.5rem;
+    }
+
+    .contact-info-card {
+        padding: 2rem 1.5rem;
     }
 }

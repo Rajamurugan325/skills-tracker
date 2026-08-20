@@ -19,10 +19,74 @@ public class WorkspaceController {
     private final Path workspaceRoot = Paths.get("workspace").toAbsolutePath();
 
     public WorkspaceController() {
-        // Create workspace directory if it doesn't exist
         try {
             if (!Files.exists(workspaceRoot)) {
                 Files.createDirectories(workspaceRoot);
+            }
+            
+            // Self-healing initialization of default workspace files
+            Path mainJava = workspaceRoot.resolve("Main.java");
+            if (!Files.exists(mainJava)) {
+                Files.writeString(mainJava, "public class Main {\n" +
+                        "    public static void main(String[] args) {\n" +
+                        "        System.out.println(\"Hello, welcome to CodePilot AI Workspace!\");\n" +
+                        "        String text = null;\n" +
+                        "        if (text != null) {\n" +
+                        "            System.out.println(\"Text length: \" + text.length());\n" +
+                        "        } else {\n" +
+                        "            System.out.println(\"Text is null, NPE avoided!\");\n" +
+                        "        }\n" +
+                        "    }\n" +
+                        "}");
+            }
+            
+            Path scriptJs = workspaceRoot.resolve("script.js");
+            if (!Files.exists(scriptJs)) {
+                Files.writeString(scriptJs, "// CodePilot JS Demo Script\n" +
+                        "function calculateFibonacci(n) {\n" +
+                        "    if (n <= 1) return n;\n" +
+                        "    return calculateFibonacci(n - 1) + calculateFibonacci(n - 2);\n" +
+                        "}\n\n" +
+                        "const terms = 10;\n" +
+                        "console.log(`Calculating first ${terms} terms of Fibonacci sequence:`);\n" +
+                        "for (let i = 0; i < terms; i++) {\n" +
+                        "    console.log(`Term ${i}: ${calculateFibonacci(i)}`);\n" +
+                        "}");
+            }
+            
+            Path styleCss = workspaceRoot.resolve("style.css");
+            if (!Files.exists(styleCss)) {
+                Files.writeString(styleCss, "/* CodePilot Workspace CSS Styling Demo */\n" +
+                        "body {\n" +
+                        "    background-color: #0f172a;\n" +
+                        "    color: #f8fafc;\n" +
+                        "    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n" +
+                        "    margin: 0;\n" +
+                        "    padding: 20px;\n" +
+                        "}\n\n" +
+                        "h1 {\n" +
+                        "    color: #6366f1;\n" +
+                        "    border-bottom: 2px solid rgba(99, 102, 241, 0.2);\n" +
+                        "    padding-bottom: 8px;\n" +
+                        "}");
+            }
+
+            Path indexHtml = workspaceRoot.resolve("index.html");
+            if (!Files.exists(indexHtml)) {
+                Files.writeString(indexHtml, "<!DOCTYPE html>\n" +
+                        "<html lang=\"en\">\n" +
+                        "<head>\n" +
+                        "    <meta charset=\"UTF-8\">\n" +
+                        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                        "    <title>CodePilot Coding Assistant Demo</title>\n" +
+                        "    <link rel=\"stylesheet\" href=\"style.css\">\n" +
+                        "</head>\n" +
+                        "<body>\n" +
+                        "    <h1>Welcome to CodePilot AI IDE</h1>\n" +
+                        "    <p>This is a sandboxed multi-language workspace for developers.</p>\n" +
+                        "    <script src=\"script.js\"></script>\n" +
+                        "</body>\n" +
+                        "</html>");
             }
         } catch (IOException e) {
             System.err.println("Failed to initialize workspace root: " + e.getMessage());

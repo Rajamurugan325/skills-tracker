@@ -297,6 +297,18 @@ const CodePilotIde = () => {
       const res = await api.post('/api/workspace/ai/action', payload);
       setAiResponse(res.data);
 
+      if (actionType === 'GENERATE_CHALLENGE') {
+        if (res.data.correctedCode) {
+          setCode(res.data.correctedCode);
+        }
+        const aiMessage = {
+          sender: 'AI',
+          text: res.data.explanation || 'Starter code loaded in editor.',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setAiMessages(prev => [...prev, aiMessage]);
+      }
+
       if (actionType === 'CHAT' || actionType === 'GENERATE' || actionType === 'EXPLAIN' || actionType === 'SQL_ASSIST' || actionType === 'LEARNING' || actionType === 'GIT' || actionType === 'DEVOPS' || actionType === 'DEPENDENCY' || actionType === 'CONVERT') {
         const aiMessage = {
           sender: 'AI',
@@ -496,6 +508,7 @@ const CodePilotIde = () => {
               <button className="ai-pill" onClick={() => triggerAiAction('REFACTOR')}>Refactor</button>
               <button className="ai-pill" onClick={() => triggerAiAction('OPTIMIZE')}>Optimize</button>
               <button className="ai-pill" onClick={() => triggerAiAction('TEST_GEN')}>Tests</button>
+              <button className="ai-pill" onClick={() => triggerAiAction('GENERATE_CHALLENGE', 'Generate a new programming question for ' + selectedLanguage)} style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)' }}>Get Challenge</button>
             </div>
 
             <div className="drawer-viewport">

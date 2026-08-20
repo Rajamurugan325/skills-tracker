@@ -289,6 +289,37 @@ public class WorkspaceAiController {
                                 "print('Translated to " + targetLang + "')")
                         .build();
 
+            case "GENERATE_CHALLENGE":
+                String starterCode = "";
+                if ("java".equalsIgnoreCase(language)) {
+                    starterCode = "public class Main {\n" +
+                            "    public static boolean isPrime(int n) {\n" +
+                            "        // TODO: Implement prime checking algorithm\n" +
+                            "        return false;\n" +
+                            "    }\n" +
+                            "    public static void main(String[] args) {\n" +
+                            "        System.out.println(isPrime(17));\n" +
+                            "    }\n" +
+                            "}";
+                } else if ("python".equalsIgnoreCase(language)) {
+                    starterCode = "def is_prime(n):\n" +
+                            "    # TODO: Implement prime checking algorithm\n" +
+                            "    return False\n\n" +
+                            "print(is_prime(17))";
+                } else {
+                    starterCode = "// Write a function to check if a number is prime\n" +
+                            "// Sample input: 17, output: true\n";
+                }
+                return AiActionResponse.builder()
+                        .explanation("### Coding Challenge (Offline Mode)\n\n" +
+                                "**Topic**: Math Algorithms & Numbers  \n" +
+                                "**Goal**: Write a function that checks if a given integer is a prime number.\n\n" +
+                                "**Sample Input**: `17`  \n" +
+                                "**Sample Output**: `true`  \n\n" +
+                                "The starter code template has been loaded into your editor. Solve it and click **Run Code** to compile!")
+                        .correctedCode(starterCode)
+                        .build();
+
             default:
                 return AiActionResponse.builder()
                         .explanation("CodePilot Offline Assist: " + action + " completed. Configure `GEMINI_API_KEY` for online intelligence.")

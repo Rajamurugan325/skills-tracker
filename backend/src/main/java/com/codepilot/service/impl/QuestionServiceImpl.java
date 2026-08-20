@@ -51,6 +51,7 @@ public class QuestionServiceImpl implements QuestionService {
         question.setCorrectAnswer(questionDto.getCorrectAnswer().toUpperCase());
         question.setExplanation(questionDto.getExplanation());
         question.setDifficulty(questionDto.getDifficulty().toUpperCase());
+        question.setQuestionType(questionDto.getQuestionType());
 
         Question updatedQuestion = questionRepository.save(question);
         return mapToDto(updatedQuestion);
@@ -105,6 +106,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .correctAnswer(question.getCorrectAnswer())
                 .explanation(question.getExplanation())
                 .difficulty(question.getDifficulty())
+                .questionType(question.getQuestionType())
                 .build();
     }
 
@@ -120,6 +122,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .correctAnswer(dto.getCorrectAnswer().toUpperCase())
                 .explanation(dto.getExplanation())
                 .difficulty(dto.getDifficulty().toUpperCase())
+                .questionType(dto.getQuestionType())
                 .build();
     }
 }

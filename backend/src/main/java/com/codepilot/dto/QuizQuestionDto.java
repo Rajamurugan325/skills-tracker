@@ -18,4 +18,5 @@ public class QuizQuestionDto {
     private String optionC;
     private String optionD;
     private String difficulty;
+    private String questionType;
 }

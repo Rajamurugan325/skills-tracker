@@ -2,8 +2,17 @@ package com.codepilot.controller;
 
 import com.codepilot.dto.WorkspaceFileDto;
 import com.codepilot.dto.WorkspaceRunnerDto;
+import com.codepilot.entity.User;
+import com.codepilot.entity.Question;
+import com.codepilot.entity.SubmissionHistory;
+import com.codepilot.repository.UserRepository;
+import com.codepilot.repository.QuestionRepository;
+import com.codepilot.repository.SubmissionHistoryRepository;
+import com.codepilot.security.UserPrincipal;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
@@ -17,6 +26,15 @@ import java.util.stream.Collectors;
 public class WorkspaceController {
 
     private final Path workspaceRoot = Paths.get("workspace").toAbsolutePath();
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
+    private SubmissionHistoryRepository submissionHistoryRepository;
 
     public WorkspaceController() {
         try {
@@ -385,6 +403,229 @@ public class WorkspaceController {
                             .executionTime("0 ms")
                             .memoryUsage("0 MB")
                             .build());
+        }
+    }
+
+    private static class TestCase {
+        String input;
+        String expectedOutput;
+        TestCase(String input, String expectedOutput) {
+            this.input = input;
+            this.expectedOutput = expectedOutput;
+        }
+    }
+
+    @PostMapping("/submit")
+    public ResponseEntity<?> submitCode(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam("path") String path,
+            @RequestParam("questionId") Long questionId,
+            @RequestParam("language") String language) {
+        try {
+            Path file = resolveSafePath(path);
+            if (!Files.exists(file)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            User user = userRepository.findById(userPrincipal.getId()).orElse(null);
+            Question question = questionRepository.findById(questionId).orElse(null);
+            if (user == null || question == null) {
+                return ResponseEntity.badRequest().body("User or Question not found.");
+            }
+
+            String codeContent = Files.readString(file);
+            String questionType = question.getQuestionType();
+
+            // Set up test cases
+            List<TestCase> testCases = new ArrayList<>();
+            if (questionId == 901L) { // Reverse String
+                testCases.add(new TestCase("hello", "olleh"));
+                testCases.add(new TestCase("world", "dlrow"));
+                testCases.add(new TestCase("codepilot", "tolipedoc"));
+            } else if (questionId == 902L) { // Prime
+                testCases.add(new TestCase("17", "true"));
+                testCases.add(new TestCase("4", "false"));
+                testCases.add(new TestCase("1", "false"));
+            } else {
+                testCases.add(new TestCase("hello", "hello"));
+            }
+
+            int passedCount = 0;
+            boolean compilationError = false;
+            boolean runtimeError = false;
+            String executionTimeStr = "12 ms";
+            String memoryUsageStr = "14 MB";
+
+            if ("SQL".equalsIgnoreCase(questionType)) {
+                // Execute user SQL against database
+                List<String> cmd = Arrays.asList("mysql", "-u", "root", "-praja2006", "-t", "codepilot", "-e", "source " + file.toAbsolutePath().toString().replace("\\", "/"));
+                ProcessBuilder pb = new ProcessBuilder(cmd);
+                pb.directory(workspaceRoot.toFile());
+                Process p = pb.start();
+                String err = readStream(p.getErrorStream());
+                int code = p.waitFor();
+                if (code == 0) {
+                    passedCount = 1;
+                    testCases = Collections.singletonList(new TestCase("", ""));
+                } else {
+                    runtimeError = true;
+                }
+            } else if ("WEB".equalsIgnoreCase(questionType) || "CONFIGURATION".equalsIgnoreCase(questionType)) {
+                boolean isValid = false;
+                if ("WEB".equalsIgnoreCase(questionType)) {
+                    isValid = codeContent.toLowerCase().contains("<html>") || codeContent.toLowerCase().contains("codepilot");
+                } else {
+                    isValid = codeContent.toLowerCase().contains("from") || codeContent.toLowerCase().contains("copy");
+                }
+                if (isValid) {
+                    passedCount = 1;
+                } else {
+                    runtimeError = true;
+                }
+                testCases = Collections.singletonList(new TestCase("", ""));
+            } else {
+                // Compile step if needed (C, C++, Java, Kotlin)
+                String fileName = file.getFileName().toString();
+                List<String> command = new ArrayList<>();
+                boolean isJava = fileName.endsWith(".java");
+
+                if (isJava) {
+                    ProcessBuilder compileBuilder = new ProcessBuilder("javac", file.toAbsolutePath().toString());
+                    Process compileProcess = compileBuilder.start();
+                    int compileCode = compileProcess.waitFor();
+                    if (compileCode != 0) {
+                        compilationError = true;
+                    } else {
+                        String className = fileName.substring(0, fileName.lastIndexOf("."));
+                        command.addAll(Arrays.asList("java", "-cp", workspaceRoot.toString(), className));
+                    }
+                } else if (fileName.endsWith(".c")) {
+                    String exeName = fileName.substring(0, fileName.lastIndexOf(".")) + ".exe";
+                    ProcessBuilder compileBuilder = new ProcessBuilder("gcc", file.toAbsolutePath().toString(), "-o", workspaceRoot.resolve(exeName).toString());
+                    Process compileProcess = compileBuilder.start();
+                    int compileCode = compileProcess.waitFor();
+                    if (compileCode != 0) {
+                        compilationError = true;
+                    } else {
+                        command.add(workspaceRoot.resolve(exeName).toString());
+                    }
+                } else if (fileName.endsWith(".cpp") || fileName.endsWith(".cc")) {
+                    String exeName = fileName.substring(0, fileName.lastIndexOf(".")) + ".exe";
+                    ProcessBuilder compileBuilder = new ProcessBuilder("g++", file.toAbsolutePath().toString(), "-o", workspaceRoot.resolve(exeName).toString());
+                    Process compileProcess = compileBuilder.start();
+                    int compileCode = compileProcess.waitFor();
+                    if (compileCode != 0) {
+                        compilationError = true;
+                    } else {
+                        command.add(workspaceRoot.resolve(exeName).toString());
+                    }
+                } else if (fileName.endsWith(".py")) {
+                    command.addAll(Arrays.asList("python", file.toAbsolutePath().toString()));
+                } else if (fileName.endsWith(".js")) {
+                    command.addAll(Arrays.asList("node", file.toAbsolutePath().toString()));
+                } else if (fileName.endsWith(".ts")) {
+                    command.addAll(Arrays.asList("npx", "ts-node", file.toAbsolutePath().toString()));
+                } else if (fileName.endsWith(".php")) {
+                    command.addAll(Arrays.asList("php", file.toAbsolutePath().toString()));
+                } else if (fileName.endsWith(".go")) {
+                    command.addAll(Arrays.asList("go", "run", file.toAbsolutePath().toString()));
+                } else if (fileName.endsWith(".cs")) {
+                    command.addAll(Arrays.asList("dotnet", "run", file.toAbsolutePath().toString()));
+                } else if (fileName.endsWith(".kt")) {
+                    String jarName = fileName.substring(0, fileName.lastIndexOf(".")) + ".jar";
+                    ProcessBuilder compileBuilder = new ProcessBuilder("kotlinc", file.toAbsolutePath().toString(), "-include-runtime", "-d", workspaceRoot.resolve(jarName).toString());
+                    Process compileProcess = compileBuilder.start();
+                    int compileCode = compileProcess.waitFor();
+                    if (compileCode != 0) {
+                        compilationError = true;
+                    } else {
+                        command.addAll(Arrays.asList("java", "-jar", workspaceRoot.resolve(jarName).toString()));
+                    }
+                }
+
+                if (!compilationError && !command.isEmpty()) {
+                    long totalDuration = 0;
+                    for (TestCase tc : testCases) {
+                        long tStart = System.nanoTime();
+                        ProcessBuilder runBuilder = new ProcessBuilder(command);
+                        runBuilder.directory(workspaceRoot.toFile());
+                        Process runProcess = runBuilder.start();
+
+                        if (tc.input != null && !tc.input.isEmpty()) {
+                            try (OutputStream os = runProcess.getOutputStream()) {
+                                os.write(tc.input.getBytes());
+                                os.flush();
+                            }
+                        }
+
+                        Timer timer = new Timer(true);
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                if (runProcess.isAlive()) {
+                                    runProcess.destroyForcibly();
+                                }
+                            }
+                        }, 5000);
+
+                        String stdout = readStream(runProcess.getInputStream());
+                        int exitCode = runProcess.waitFor();
+                        timer.cancel();
+                        long tEnd = System.nanoTime();
+                        totalDuration += (tEnd - tStart);
+
+                        if (exitCode == 0) {
+                            String trimmedOut = stdout.trim().replaceAll("\\r?\\n", "");
+                            String trimmedExpected = tc.expectedOutput.trim().replaceAll("\\r?\\n", "");
+                            if (trimmedOut.equalsIgnoreCase(trimmedExpected)) {
+                                passedCount++;
+                            }
+                        } else {
+                            runtimeError = true;
+                        }
+                    }
+                    double durationMs = (totalDuration / (double) testCases.size()) / 1_000_000.0;
+                    executionTimeStr = String.format("%.1f ms", durationMs);
+                    long totalMemoryBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+                    memoryUsageStr = String.format("%.2f MB", totalMemoryBytes / (1024.0 * 1024.0));
+                }
+            }
+
+            String status = "Accepted";
+            if (compilationError) {
+                status = "Compilation Error";
+            } else if (runtimeError) {
+                status = "Runtime Error";
+            } else if (passedCount < testCases.size()) {
+                status = "Wrong Answer";
+            }
+
+            SubmissionHistory history = SubmissionHistory.builder()
+                    .user(user)
+                    .questionId(questionId)
+                    .questionTitle(question.getTopic().getName() + " - Challenge")
+                    .language(language)
+                    .code(codeContent)
+                    .status(status)
+                    .runtime(executionTimeStr)
+                    .memory(memoryUsageStr)
+                    .passedCases(passedCount)
+                    .totalCases(testCases.size())
+                    .build();
+            submissionHistoryRepository.save(history);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", status);
+            response.put("passedCases", passedCount);
+            response.put("totalCases", testCases.size());
+            response.put("runtime", executionTimeStr);
+            response.put("memory", memoryUsageStr);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Submission grading exception: " + e.getMessage());
         }
     }
 

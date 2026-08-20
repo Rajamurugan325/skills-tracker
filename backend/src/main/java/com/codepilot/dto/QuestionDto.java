@@ -43,4 +43,6 @@ public class QuestionDto {
 
     @NotBlank
     private String difficulty; // EASY, MEDIUM, HARD
+
+    private String questionType;
 }

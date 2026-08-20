@@ -45,6 +45,23 @@ public class Question {
     @Column(nullable = false, length = 20)
     private String difficulty; // EASY, MEDIUM, HARD
 
+    @Column(name = "question_type", length = 30)
+    private String questionType;
+
+    public String getQuestionType() {
+        if (questionType != null && !questionType.isEmpty()) {
+            return questionType;
+        }
+        if (topic != null) {
+            String cat = topic.getCategory();
+            if ("SQL".equalsIgnoreCase(cat)) return "SQL";
+            if ("FULLSTACK".equalsIgnoreCase(cat)) return "WEB";
+            if ("APTITUDE".equalsIgnoreCase(cat)) return "APTITUDE";
+            if ("HR".equalsIgnoreCase(cat) || "BEHAVIORAL".equalsIgnoreCase(cat)) return "HR";
+        }
+        return "MCQ";
+    }
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

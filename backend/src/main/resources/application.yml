@@ -28,3 +28,5 @@ app:
   jwt:
     secret: ${JWT_SECRET:dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVwaWxvdC1jYW5kaWRhdGUtcG9ydGZvbGlvLXByb2plY3Qtd2hpY2gtbXVzdC1iZS0yNTYtYml0cy1sb25n}
     expiration-ms: 86400000 # 24 hours
+  gemini:
+    api-key: ${GEMINI_API_KEY:}

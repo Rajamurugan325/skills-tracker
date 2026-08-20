@@ -5,7 +5,7 @@ public class Main {
         if (text != null) {
             System.out.println("Text length: " + text.length());
         } else {
-            System.out.println("Text is null, NPE avoided!");
+            System.out.println("Text is null, NPE avoided!")
         }
     }
 }

@@ -8,6 +8,7 @@ import com.codepilot.service.AiService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +48,9 @@ public class AiServiceImpl implements AiService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    @Value("${app.gemini.api-key:}")
+    private String geminiApiKey;
+
     @Override
     @Transactional(readOnly = true)
     public List<ChatMessageDto> getChatHistory(Long userId) {
@@ -85,6 +89,9 @@ public class AiServiceImpl implements AiService {
         // 3. Generate response using online LLM or offline local RAG engine
         String aiResponseText;
         String apiKey = System.getenv("GEMINI_API_KEY");
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            apiKey = geminiApiKey;
+        }
 
         if (apiKey != null && !apiKey.trim().isEmpty()) {
             aiResponseText = generateWithGemini(userMessage, ragContext, apiKey);

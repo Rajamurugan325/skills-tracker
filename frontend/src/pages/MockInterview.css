@@ -356,3 +356,71 @@
   color: #fff !important;
   box-shadow: 0 0 10px var(--primary-glow);
 }
+
+/* Print/PDF Export Media Styles */
+@media print {
+  body, #root, .app-container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    display: block !important;
+  }
+
+  .sidebar,
+  .navbar,
+  .results-footer,
+  aside,
+  header {
+    display: none !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .scorecard-wrapper {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    box-shadow: none !important;
+  }
+
+  /* Force light theme elements for printing */
+  .glass-panel, 
+  .scorecard-header, 
+  .scorecard-section, 
+  .scorecard-card {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #dddddd !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-radius: 4px !important;
+  }
+
+  .breakdown-bar-track {
+    background: #eeeeee !important;
+    border: 1px solid #cccccc !important;
+  }
+
+  .breakdown-bar-fill {
+    background: #4f46e5 !important;
+    box-shadow: none !important;
+  }
+
+  h1, h2, h3, h4, h5, h6, p, span, strong, li {
+    color: #000000 !important;
+  }
+
+  .text-indigo {
+    color: #4f46e5 !important;
+  }
+
+  .scorecard-grid-bottom {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    page-break-inside: avoid;
+  }
+}

@@ -60,4 +60,11 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Optional<Question> findRandomByCategoryExcluding(
             @Param("category") String category, 
             @Param("excludedIds") Collection<Long> excludedIds);
+
+    @Query(value = "SELECT q.* FROM questions q " +
+                   "JOIN topics t ON q.topic_id = t.id " +
+                   "WHERE UPPER(q.question_text) LIKE UPPER(CONCAT('%', :query, '%')) " +
+                   "OR UPPER(t.name) LIKE UPPER(CONCAT('%', :query, '%')) " +
+                   "LIMIT 5", nativeQuery = true)
+    List<Question> searchByKeyword(@Param("query") String query);
 }

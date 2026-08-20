@@ -18,6 +18,9 @@ services:
         description: "MySQL database password"
       - key: JWT_SECRET
         value: dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLWNvZGVwaWxvdC1jYW5kaWRhdGUtcG9ydGZvbGlvLXByb2plY3Qtd2hpY2gtbXVzdC1iZS0yNTYtYml0cy1sb25n
+      - key: GEMINI_API_KEY
+        sync: false
+        description: "(Optional) Google Gemini API Key for online conversational RAG AI. Leave empty for local offline RAG mode."
 
   # React Frontend Static Site
   - type: web

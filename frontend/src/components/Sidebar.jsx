@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, BookOpen, ClipboardCheck, History, 
-  ShieldAlert, Sparkles, Users, Briefcase, User, LogOut, Shield, Database 
+  ShieldAlert, Sparkles, Users, Briefcase, User, LogOut, Shield, Database, Bot 
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -68,6 +68,10 @@ const Sidebar = () => {
             <Link to="/recommendations" className={`menu-item ${isActive('/recommendations')}`}>
               <Sparkles size={18} />
               <span>Recommendations</span>
+            </Link>
+            <Link to="/ai-assistant" className={`menu-item ${isActive('/ai-assistant')}`}>
+              <Bot size={18} />
+              <span>AI Copilot</span>
             </Link>
 
             <div className="menu-group">CAREER READY</div>

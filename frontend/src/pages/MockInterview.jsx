@@ -4,7 +4,7 @@ import QuestionCard from '../components/QuestionCard';
 import ProgressBar from '../components/ProgressBar';
 import Loading from '../components/Loading';
 import Error from '../components/Error';
-import { Users, Play, Award, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Users, Play, Award, CheckCircle, AlertTriangle, Printer } from 'lucide-react';
 import './MockInterview.css';
 
 const MockInterview = () => {
@@ -348,6 +348,10 @@ const MockInterview = () => {
         </div>
 
         <div className="results-footer">
+          <button onClick={() => window.print()} className="glass-button print-btn" style={{ marginRight: '15px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Printer size={16} />
+            <span>Download PDF Report</span>
+          </button>
           <button onClick={() => setActiveStep(0)} className="glass-button">
             Back to Lobby
           </button>

@@ -6,8 +6,8 @@ import Error from '../components/Error';
 import { 
   Folder, File, Play, Save, Trash2, Plus, FolderPlus, 
   Sparkles, Code, ShieldAlert, Cpu, CheckSquare, RefreshCw, 
-  Send, Bot, User, FileText, ChevronRight, CornerDownRight, 
-  GitBranch, Terminal, ExternalLink, HelpCircle, Layers, X
+  Send, Bot, User, FileText, ChevronRight, Terminal, 
+  ExternalLink, HelpCircle, Layers, X, Share2, RotateCcw, Maximize, Minimize 
 } from 'lucide-react';
 import './CodePilotIde.css';
 
@@ -20,14 +20,21 @@ const CodePilotIde = () => {
   const [explorerLoading, setExplorerLoading] = useState(true);
   const [newFileName, setNewFileName] = useState('');
   const [showCreateInput, setShowCreateInput] = useState(null); // 'FILE' or 'DIRECTORY'
-  const [codeSearch, setCodeSearch] = useState('');
-  const fileInputRef = useRef(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('java');
 
-  // Terminal state
+  // Input & Output states
+  const [customInput, setCustomInput] = useState('');
   const [terminalStdout, setTerminalStdout] = useState('');
   const [terminalStderr, setTerminalStderr] = useState('');
   const [terminalExitCode, setTerminalExitCode] = useState(null);
   const [terminalRunning, setTerminalRunning] = useState(false);
+  const [executionTime, setExecutionTime] = useState('0 ms');
+  const [memoryUsage, setMemoryUsage] = useState('0 MB');
+  const [statusText, setStatusText] = useState('Ready');
+
+  // Layout states
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showAiDrawer, setShowAiDrawer] = useState(false);
 
   // AI Assistant Right Drawer State
   const [aiTab, setAiTab] = useState('chat'); // 'chat', 'review', 'fix'
@@ -42,17 +49,30 @@ const CodePilotIde = () => {
     fetchFiles();
   }, []);
 
-  const fetchFiles = async () => {
+  const fetchFiles = async (langToSelect = 'java') => {
     try {
       setExplorerLoading(true);
       const res = await api.get('/api/workspace/files');
       setFiles(res.data);
-      if (res.data.length > 0 && !activeFile) {
-        // Load first file by default
-        const firstFile = res.data.find(f => f.type === 'FILE');
-        if (firstFile) {
-          loadFile(firstFile);
-        }
+      
+      // Auto resolve active file corresponding to language selected
+      const targetFileName = getTargetFileName(langToSelect);
+      const matchedFile = res.data.find(f => f.name.toLowerCase() === targetFileName.toLowerCase());
+      
+      if (matchedFile) {
+        loadFile(matchedFile);
+      } else {
+        // Create file if it doesn't exist
+        await api.post(`/api/workspace/files/create?path=${targetFileName}&type=FILE`);
+        // Save standard starter template
+        await api.post('/api/workspace/files/save', {
+          path: targetFileName,
+          content: getStarterTemplate(langToSelect)
+        });
+        const refreshRes = await api.get('/api/workspace/files');
+        setFiles(refreshRes.data);
+        const createdFile = refreshRes.data.find(f => f.name.toLowerCase() === targetFileName.toLowerCase());
+        if (createdFile) loadFile(createdFile);
       }
     } catch (err) {
       console.error('Error fetching files', err);
@@ -61,11 +81,56 @@ const CodePilotIde = () => {
     }
   };
 
+  const getTargetFileName = (lang) => {
+    switch (lang) {
+      case 'java': return 'Main.java';
+      case 'python': return 'main.py';
+      case 'javascript': return 'index.js';
+      case 'c': return 'main.c';
+      case 'cpp': return 'main.cpp';
+      case 'php': return 'main.php';
+      case 'go': return 'main.go';
+      case 'csharp': return 'main.cs';
+      case 'kotlin': return 'main.kt';
+      default: return 'Main.java';
+    }
+  };
+
+  const getStarterTemplate = (lang) => {
+    switch (lang) {
+      case 'java':
+        return `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from Java Compiler!");\n    }\n}`;
+      case 'python':
+        return `print("Hello from Python Compiler!")`;
+      case 'javascript':
+        return `console.log("Hello from JavaScript Compiler!");`;
+      case 'c':
+        return `#include <stdio.h>\n\nint main() {\n    printf("Hello from C Compiler!\\n");\n    return 0;\n}`;
+      case 'cpp':
+        return `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello from C++ Compiler!" << endl;\n    return 0;\n}`;
+      case 'php':
+        return `<?php\necho "Hello from PHP Compiler!\\n";\n?>`;
+      case 'go':
+        return `package main\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from Go Compiler!")\n}`;
+      case 'csharp':
+        return `using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello from C# Compiler!");\n    }\n}`;
+      case 'kotlin':
+        return `fun main() {\n    println("Hello from Kotlin Compiler!")\n}`;
+      default:
+        return '';
+    }
+  };
+
   const loadFile = async (file) => {
     try {
       const res = await api.get(`/api/workspace/files/content?path=${file.path}`);
       setActiveFile(res.data);
       setCode(res.data.content || '');
+      
+      // Update selected language dropdown based on active file loaded
+      const ext = file.name.substring(file.name.lastIndexOf('.'));
+      const resolvedLang = getLanguageFromExt(ext);
+      setSelectedLanguage(resolvedLang);
       
       // Add to tabs if not present
       if (!openTabs.find(t => t.path === file.path)) {
@@ -76,17 +141,39 @@ const CodePilotIde = () => {
     }
   };
 
+  const getLanguageFromExt = (ext) => {
+    switch (ext) {
+      case '.java': return 'java';
+      case '.py': return 'python';
+      case '.js': return 'javascript';
+      case '.c': return 'c';
+      case '.cpp': return 'cpp';
+      case '.php': return 'php';
+      case '.go': return 'go';
+      case '.cs': return 'csharp';
+      case '.kt': return 'kotlin';
+      default: return 'java';
+    }
+  };
+
+  const handleLanguageChange = (e) => {
+    const newLang = e.target.value;
+    setSelectedLanguage(newLang);
+    fetchFiles(newLang);
+  };
+
   const saveActiveFile = async () => {
     if (!activeFile) return;
     try {
+      setStatusText('Saving...');
       await api.post('/api/workspace/files/save', {
         path: activeFile.path,
         content: code
       });
-      // Show terminal alert
-      setTerminalStdout(prev => prev + `[System] Saved ${activeFile.name} successfully.\n`);
+      setStatusText('Saved successfully');
+      setTimeout(() => setStatusText('Ready'), 2000);
     } catch (err) {
-      setTerminalStderr(prev => prev + `[System Error] Failed to save file.\n`);
+      setStatusText('Error saving file');
     }
   };
 
@@ -94,6 +181,7 @@ const CodePilotIde = () => {
     if (!activeFile) return;
     try {
       setTerminalRunning(true);
+      setStatusText('Compiling & Running...');
       setTerminalStdout('');
       setTerminalStderr('');
       setTerminalExitCode(null);
@@ -104,16 +192,54 @@ const CodePilotIde = () => {
         content: code
       });
 
-      const res = await api.post(`/api/workspace/run?path=${activeFile.path}`);
+      // Pass path and custom input parameters
+      const params = new URLSearchParams();
+      params.append('path', activeFile.path);
+      params.append('input', customInput);
+
+      const res = await api.post(`/api/workspace/run?${params.toString()}`);
       setTerminalStdout(res.data.stdout || '');
       setTerminalStderr(res.data.stderr || '');
       setTerminalExitCode(res.data.exitCode);
+      setExecutionTime(res.data.executionTime || '0 ms');
+      setMemoryUsage(res.data.memoryUsage || '0 MB');
+      
+      if (res.data.exitCode === 0) {
+        setStatusText('Execution completed');
+      } else {
+        setStatusText('Execution failed');
+      }
     } catch (err) {
       setTerminalStderr('Runner exception: ' + err.message);
       setTerminalExitCode(-1);
+      setStatusText('Error');
     } finally {
       setTerminalRunning(false);
+      setTimeout(() => setStatusText('Ready'), 3000);
     }
+  };
+
+  const resetCode = () => {
+    if (window.confirm('Reset code to starter template? Your current changes will be overwritten.')) {
+      setCode(getStarterTemplate(selectedLanguage));
+    }
+  };
+
+  const downloadCode = () => {
+    if (!activeFile) return;
+    const element = document.createElement("a");
+    const file = new Blob([code], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = activeFile.name;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const shareCode = () => {
+    const shareUrl = `${window.location.origin}/workspace?lang=${selectedLanguage}&code=${encodeURIComponent(code)}`;
+    navigator.clipboard.writeText(shareUrl);
+    alert('Shareable compiler workspace link copied to clipboard!');
   };
 
   const createNewItem = async (type) => {
@@ -122,7 +248,7 @@ const CodePilotIde = () => {
       await api.post(`/api/workspace/files/create?path=${newFileName}&type=${type}`);
       setNewFileName('');
       setShowCreateInput(null);
-      fetchFiles();
+      fetchFiles(selectedLanguage);
     } catch (err) {
       alert('Failed to create item. Name conflict or directory invalid.');
     }
@@ -132,13 +258,12 @@ const CodePilotIde = () => {
     if (!window.confirm(`Are you sure you want to delete ${file.name}?`)) return;
     try {
       await api.delete(`/api/workspace/files/delete?path=${file.path}`);
-      // Remove from tabs and clear active file if it was deleted
       setOpenTabs(prev => prev.filter(t => t.path !== file.path));
       if (activeFile && activeFile.path === file.path) {
         setActiveFile(null);
         setCode('');
       }
-      fetchFiles();
+      fetchFiles(selectedLanguage);
     } catch (err) {
       alert('Error deleting item');
     }
@@ -150,8 +275,8 @@ const CodePilotIde = () => {
     try {
       setAiLoading(true);
       setAiError('');
+      setShowAiDrawer(true);
       
-      // Set correct tab depending on action
       if (actionType === 'REVIEW') {
         setAiTab('review');
       } else if (actionType === 'BUG_DETECT' || actionType === 'OPTIMIZE' || actionType === 'REFACTOR') {
@@ -172,7 +297,6 @@ const CodePilotIde = () => {
       const res = await api.post('/api/workspace/ai/action', payload);
       setAiResponse(res.data);
 
-      // Append message if using Chat/Interactive actions
       if (actionType === 'CHAT' || actionType === 'GENERATE' || actionType === 'EXPLAIN' || actionType === 'SQL_ASSIST' || actionType === 'LEARNING' || actionType === 'GIT' || actionType === 'DEVOPS' || actionType === 'DEPENDENCY' || actionType === 'CONVERT') {
         const aiMessage = {
           sender: 'AI',
@@ -183,7 +307,7 @@ const CodePilotIde = () => {
         setAiMessages(prev => [...prev, aiMessage]);
       }
     } catch (err) {
-      setAiError('AI Copilot request failed. Please check backend logs.');
+      setAiError('AI Copilot request failed.');
       console.error(err);
     } finally {
       setAiLoading(false);
@@ -205,7 +329,8 @@ const CodePilotIde = () => {
   const applyCorrectedCode = () => {
     if (aiResponse && aiResponse.correctedCode) {
       setCode(aiResponse.correctedCode);
-      setTerminalStdout(prev => prev + '[AI Copilot] Applied automated corrections into the active editor.\n');
+      setStatusText('AI fix applied');
+      setTimeout(() => setStatusText('Ready'), 2000);
     }
   };
 
@@ -217,364 +342,248 @@ const CodePilotIde = () => {
       case '.py': return 'python';
       case '.js': return 'javascript';
       case '.ts': return 'typescript';
+      case '.c': return 'c';
+      case '.cpp': return 'cpp';
+      case '.php': return 'php';
+      case '.go': return 'go';
+      case '.cs': return 'csharp';
+      case '.kt': return 'kotlin';
+      case '.sql': return 'sql';
       case '.html': return 'html';
       case '.css': return 'css';
-      case '.sql': return 'sql';
-      case '.cpp':
-      case '.cc': return 'cpp';
-      case '.c': return 'c';
       default: return 'text';
     }
   };
 
-  const closeTab = (tabPath) => {
-    const remaining = openTabs.filter(t => t.path !== tabPath);
-    setOpenTabs(remaining);
-    if (activeFile && activeFile.path === tabPath) {
-      if (remaining.length > 0) {
-        loadFile(remaining[remaining.length - 1]);
-      } else {
-        setActiveFile(null);
-        setCode('');
-      }
-    }
-  };
-
   return (
-    <div className="codepilot-ide-layout">
-      {/* 1. LEFT PANEL: Workspace Explorer & Search */}
-      <aside className="ide-left-panel glass-panel">
-        <div className="panel-header">
-          <h3>WORKSPACE EXPLORER</h3>
-          <div className="explorer-actions">
-            <button onClick={() => setShowCreateInput(showCreateInput === 'FILE' ? null : 'FILE')} title="New File">
-              <Plus size={16} />
-            </button>
-            <button onClick={() => setShowCreateInput(showCreateInput === 'DIRECTORY' ? null : 'DIRECTORY')} title="New Folder">
-              <FolderPlus size={16} />
-            </button>
-            <button onClick={fetchFiles} title="Refresh Workspace">
-              <RefreshCw size={14} />
-            </button>
-          </div>
+    <div className={`codecompiler-workspace ${isFullscreen ? 'fullscreen-mode' : ''} ${showAiDrawer ? 'ai-drawer-open' : ''}`}>
+      {/* 1. TOP HEADER BAR */}
+      <header className="compiler-top-header">
+        <div className="left-brand">
+          <Terminal className="logo-icon" />
+          <span className="brand-logo">CodeCompiler</span>
         </div>
 
-        {showCreateInput && (
-          <div className="create-item-form">
-            <input 
-              type="text" 
-              placeholder={`Create ${showCreateInput.toLowerCase()}... (e.g. Test.java)`} 
-              value={newFileName} 
-              onChange={(e) => setNewFileName(e.target.value)} 
-              onKeyDown={(e) => e.key === 'Enter' && createNewItem(showCreateInput)}
-            />
-            <div className="form-buttons">
-              <button className="glass-button success" onClick={() => createNewItem(showCreateInput)}>Create</button>
-              <button className="glass-button danger" onClick={() => setShowCreateInput(null)}>Cancel</button>
-            </div>
-          </div>
-        )}
+        <div className="middle-controls">
+          <select className="language-selector-dropdown" value={selectedLanguage} onChange={handleLanguageChange}>
+            <option value="java">Java</option>
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="php">PHP</option>
+            <option value="go">Go</option>
+            <option value="csharp">C#</option>
+            <option value="kotlin">Kotlin</option>
+          </select>
 
-        <div className="file-tree-container">
-          {explorerLoading ? (
-            <Loading />
-          ) : (
-            <div className="file-list">
-              {files.map((file, i) => (
-                <div 
-                  key={i} 
-                  className={`file-item ${activeFile?.path === file.path ? 'active' : ''}`}
-                >
-                  <div className="file-item-click" onClick={() => loadFile(file)}>
-                    {file.type === 'DIRECTORY' ? (
-                      <Folder size={15} style={{ color: '#fbbf24', marginRight: '6px' }} />
-                    ) : (
-                      <File size={15} style={{ color: '#94a3b8', marginRight: '6px' }} />
-                    )}
-                    <span className="file-name">{file.name}</span>
-                  </div>
-                  <button className="delete-file-btn" onClick={() => deleteItem(file)} title="Delete">
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Workspace Codebase Search */}
-        <div className="workspace-search-panel">
-          <h4>Search Codebase</h4>
-          <div className="search-box">
-            <input 
-              type="text" 
-              placeholder="e.g. Find Database Connection..." 
-              value={codeSearch} 
-              onChange={(e) => setCodeSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && triggerAiAction('CHAT', `Find where this concept is in the files: ${codeSearch}`)}
-            />
-            <button onClick={() => triggerAiAction('CHAT', `Find where this concept is in the files: ${codeSearch}`)}>
-              <Send size={14} />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* 2. CENTER PANEL: Editor, Quick AI Toolbar & Output Terminal */}
-      <main className="ide-center-panel">
-        {/* File Tabs */}
-        <div className="editor-tabs-bar">
-          {openTabs.map((tab, idx) => (
-            <div 
-              key={idx} 
-              className={`editor-tab-item ${activeFile?.path === tab.path ? 'active' : ''}`}
-              onClick={() => loadFile(tab)}
-            >
-              <span>{tab.name}</span>
-              <button className="close-tab-btn" onClick={(e) => { e.stopPropagation(); closeTab(tab.path); }}>
-                <X size={10} />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Editor Controls */}
-        <div className="editor-controls-bar">
-          <div className="left-controls">
-            <button className="glass-button primary run-btn" onClick={runActiveCode} disabled={terminalRunning || !activeFile}>
-              <Play size={14} style={{ marginRight: '6px' }} />
-              {terminalRunning ? 'Running...' : 'Run Code'}
-            </button>
-            <button className="glass-button save-btn" onClick={saveActiveFile} disabled={!activeFile}>
-              <Save size={14} style={{ marginRight: '6px' }} />
-              Save File
-            </button>
-          </div>
+          <button className="run-action-btn" onClick={runActiveCode} disabled={terminalRunning || !activeFile}>
+            <Play size={14} className="play-icon" />
+            {terminalRunning ? 'Running...' : 'Run Code'}
+          </button>
           
-          <div className="file-info-badge">
-            <Code size={14} />
-            <span>{activeFile ? `${activeFile.name} (${getEditorLanguage(activeFile.name)})` : 'No file open'}</span>
+          <button className="action-button-compiler" onClick={saveActiveFile} title="Save file to cloud">
+            <Save size={13} /> Save
+          </button>
+
+          <button className="action-button-compiler" onClick={shareCode} title="Get shareable link">
+            <Share2 size={13} /> Share
+          </button>
+
+          <button className="action-button-compiler" onClick={resetCode} title="Reset code template">
+            <RotateCcw size={13} /> Reset
+          </button>
+
+          <button className="action-button-compiler" onClick={downloadCode} title="Download file to computer">
+            <FileText size={13} /> Download
+          </button>
+        </div>
+
+        <div className="right-toggles">
+          <button className="ai-assistant-toggle-btn" onClick={() => setShowAiDrawer(!showAiDrawer)}>
+            <Sparkles size={14} style={{ marginRight: '6px' }} />
+            AI Copilot
+          </button>
+          <button className="action-button-compiler" onClick={() => setIsFullscreen(!isFullscreen)}>
+            {isFullscreen ? <Minimize size={13} /> : <Maximize size={13} />}
+          </button>
+        </div>
+      </header>
+
+      {/* 2. MAIN SPLIT EDITOR CONTENT AREA */}
+      <div className="compiler-main-content">
+        
+        {/* LEFT COMPILER BLOCK: Code Editor */}
+        <section className="left-code-editor-panel">
+          <div className="panel-tab-headers">
+            <span className="active-tab-file">
+              <Code size={13} style={{ marginRight: '6px' }} />
+              {activeFile ? activeFile.name : 'Editor'}
+            </span>
           </div>
-        </div>
 
-        {/* Quick AI Action Pills */}
-        <div className="quick-ai-toolbar">
-          <button className="action-pill" onClick={() => triggerAiAction('EXPLAIN')} title="Explain code line-by-line">Explain</button>
-          <button className="action-pill" onClick={() => triggerAiAction('BUG_DETECT')} title="Detect logic or syntax bugs">Find Bugs</button>
-          <button className="action-pill" onClick={() => triggerAiAction('REFACTOR')} title="Remove duplicates & refactor readability">Refactor</button>
-          <button className="action-pill" onClick={() => triggerAiAction('OPTIMIZE')} title="Optimize performance complexities">Optimize</button>
-          <button className="action-pill" onClick={() => triggerAiAction('TEST_GEN')} title="Generate unit testing frameworks">Generate Tests</button>
-          <button className="action-pill" onClick={() => triggerAiAction('REVIEW')} title="Professional grading review checks">Review</button>
-          <button className="action-pill" onClick={() => triggerAiAction('SECURE')} title="Inspect common security exploits">Secure</button>
-          <button className="action-pill" onClick={() => triggerAiAction('DOCUMENT')} title="Create Javadoc or README docs">Document</button>
-          <button className="action-pill" onClick={() => {
-            const target = prompt('Enter target programming language (e.g. Python, Java, JavaScript):', 'Python');
-            if (target) triggerAiAction('CONVERT', '', target);
-          }} title="Translate to another language">Convert</button>
-        </div>
+          <div className="editor-screen-frame">
+            {activeFile ? (
+              <Editor
+                height="100%"
+                language={getEditorLanguage(activeFile.name)}
+                theme="vs-dark"
+                value={code}
+                onChange={(val) => setCode(val)}
+                options={{
+                  fontSize: 14,
+                  minimap: { enabled: false },
+                  automaticLayout: true,
+                  padding: { top: 12 },
+                  autoSave: true
+                }}
+              />
+            ) : (
+              <div className="no-editor-placeholder">
+                <Code size={36} className="muted-icon" />
+                <p>Initializing compiler workspace...</p>
+              </div>
+            )}
+          </div>
+        </section>
 
-        {/* Monaco Editor Screen */}
-        <div className="editor-screen-wrapper">
-          {activeFile ? (
-            <Editor
-              height="100%"
-              language={getEditorLanguage(activeFile.name)}
-              theme="vs-dark"
-              value={code}
-              onChange={(val) => setCode(val)}
-              options={{
-                fontSize: 14,
-                minimap: { enabled: false },
-                automaticLayout: true,
-                padding: { top: 12 }
-              }}
+        {/* RIGHT COMPILER BLOCK: Input & Output / Console */}
+        <section className="right-input-output-panel">
+          
+          {/* Top Half: Input Panel */}
+          <div className="compiler-input-panel">
+            <div className="panel-header-bar">
+              <span>CUSTOM INPUT (stdin)</span>
+            </div>
+            <textarea 
+              className="input-textarea"
+              placeholder="Enter parameters or values here to pass to program inputs..."
+              value={customInput}
+              onChange={e => setCustomInput(e.target.value)}
             />
-          ) : (
-            <div className="no-active-editor">
-              <Code size={48} className="placeholder-icon" />
-              <h3>No File Active</h3>
-              <p>Double-click or click any file in the explorer tree to load it into the editor.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Console Drawer */}
-        <div className="terminal-drawer glass-panel">
-          <div className="terminal-header">
-            <div className="title">
-              <Terminal size={14} />
-              <span>CONSOLE OUTPUT</span>
-            </div>
-            <button className="clear-btn" onClick={() => { setTerminalStdout(''); setTerminalStderr(''); }}>Clear</button>
           </div>
-          <div className="terminal-body">
-            {terminalStdout && <pre className="stdout-text">{terminalStdout}</pre>}
-            {terminalStderr && <pre className="stderr-text">{terminalStderr}</pre>}
-            {!terminalStdout && !terminalStderr && <pre className="muted-text">Ready to run code...</pre>}
+
+          {/* Bottom Half: Output / Console */}
+          <div className="compiler-output-panel">
+            <div className="panel-header-bar">
+              <span>OUTPUT / CONSOLE</span>
+              {terminalStdout || terminalStderr ? (
+                <button className="clear-console-btn" onClick={() => { setTerminalStdout(''); setTerminalStderr(''); }}>Clear</button>
+              ) : null}
+            </div>
+            <div className="output-console-body">
+              {terminalStdout && <pre className="output-stdout">{terminalStdout}</pre>}
+              {terminalStderr && <pre className="output-stderr">{terminalStderr}</pre>}
+              {!terminalStdout && !terminalStderr && <span className="empty-logs">Execution logs will print here...</span>}
+            </div>
           </div>
-        </div>
-      </main>
 
-      {/* 3. RIGHT PANEL: AI Copilot Drawer panel */}
-      <aside className="ide-right-panel glass-panel">
-        <div className="panel-tab-headers">
-          <button className={`tab-hdr ${aiTab === 'chat' ? 'active' : ''}`} onClick={() => setAiTab('chat')}>AI COPILOT</button>
-          <button className={`tab-hdr ${aiTab === 'review' ? 'active' : ''}`} onClick={() => setAiTab('review')}>CODE REVIEW</button>
-          <button className={`tab-hdr ${aiTab === 'fix' ? 'active' : ''}`} onClick={() => setAiTab('fix')}>FIX & OPTIMIZE</button>
-        </div>
+        </section>
 
-        <div className="panel-tab-body">
-          {/* Tab 1: AI Chat */}
-          {aiTab === 'chat' && (
-            <div className="chat-container">
-              <div className="ai-chat-viewport">
-                {aiMessages.length === 0 ? (
-                  <div className="empty-chat-help">
-                    <Bot size={36} className="bot-logo-pulse" />
-                    <h4>Ask CodePilot AI anything!</h4>
-                    <p>Get study guidance, ask questions, or request code helpers.</p>
-                    
-                    <div className="preset-suggestions">
-                      <h5>Preset Quick prompts:</h5>
-                      <button className="preset-pill" onClick={() => triggerAiAction('SQL_ASSIST', 'Create a JOIN query between Employee and Department')}>
-                        Generate a SQL Join query
-                      </button>
-                      <button className="preset-pill" onClick={() => triggerAiAction('GIT', 'Create a commit message for fixing login validation')}>
-                        Generate Git Commit Message
-                      </button>
-                      <button className="preset-pill" onClick={() => triggerAiAction('DEVOPS', 'Create a Jenkinsfile for a Maven Java project')}>
-                        Create Jenkins CI/CD script
-                      </button>
-                      <button className="preset-pill" onClick={() => triggerAiAction('LEARNING', 'Explain recursion simply with practice questions')}>
-                        Explain Recursion (Tutor)
-                      </button>
-                      <button className="preset-pill" onClick={() => triggerAiAction('API_GEN', 'Create a REST API for employee management')}>
-                        Generate Employee REST API
-                      </button>
-                      <button className="preset-pill" onClick={() => triggerAiAction('DEPENDENCY', 'Add Selenium 4 dependency to Maven pom.xml')}>
-                        Add Selenium 4 Maven config
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="chat-msg-list">
-                    {aiMessages.map((msg, i) => (
-                      <div key={i} className={`chat-message-row ${msg.sender.toLowerCase()}`}>
-                        <div className="avatar">
-                          {msg.sender === 'AI' ? <Bot size={14} /> : <User size={14} />}
-                        </div>
-                        <div className="msg-content">
-                          <pre className="msg-text">{msg.text}</pre>
-                        </div>
+        {/* 3. COLLAPSIBLE RIGHT AI ASSISTANT DRAWER */}
+        {showAiDrawer && (
+          <aside className="ai-assistant-drawer glass-panel">
+            <div className="drawer-tabs-row">
+              <button className={`tab-btn ${aiTab === 'chat' ? 'active' : ''}`} onClick={() => setAiTab('chat')}>CHAT</button>
+              <button className={`tab-btn ${aiTab === 'review' ? 'active' : ''}`} onClick={() => setAiTab('review')}>REVIEW</button>
+              <button className={`tab-btn ${aiTab === 'fix' ? 'active' : ''}`} onClick={() => setAiTab('fix')}>AUTOFIX</button>
+              <button className="close-drawer-btn" onClick={() => setShowAiDrawer(false)}><X size={14} /></button>
+            </div>
+
+            <div className="drawer-actions-toolbar">
+              <button className="ai-pill" onClick={() => triggerAiAction('EXPLAIN')}>Explain</button>
+              <button className="ai-pill" onClick={() => triggerAiAction('BUG_DETECT')}>Bugs</button>
+              <button className="ai-pill" onClick={() => triggerAiAction('REFACTOR')}>Refactor</button>
+              <button className="ai-pill" onClick={() => triggerAiAction('OPTIMIZE')}>Optimize</button>
+              <button className="ai-pill" onClick={() => triggerAiAction('TEST_GEN')}>Tests</button>
+            </div>
+
+            <div className="drawer-viewport">
+              {aiTab === 'chat' && (
+                <div className="chat-tab-container">
+                  <div className="chat-messages-scroll">
+                    {aiMessages.length === 0 ? (
+                      <div className="empty-help">
+                        <Bot size={24} className="pulsing-logo" />
+                        <p>Ask CodePilot to generate, refactor, or explain this workspace code!</p>
                       </div>
-                    ))}
-                    {aiLoading && (
-                      <div className="chat-message-row ai loading">
-                        <div className="avatar"><Bot size={14} /></div>
-                        <div className="msg-content">Thinking...</div>
-                      </div>
+                    ) : (
+                      aiMessages.map((msg, i) => (
+                        <div key={i} className={`msg-block ${msg.sender.toLowerCase()}`}>
+                          <div className="msg-text">{msg.text}</div>
+                        </div>
+                      ))
                     )}
+                    {aiLoading && <div className="msg-block ai typing">AI is typing...</div>}
                   </div>
-                )}
-              </div>
-
-              {aiError && <div className="ai-error-banner">{aiError}</div>}
-
-              <div className="ai-chat-input-bar">
-                <input 
-                  type="text" 
-                  placeholder="Ask CodePilot anything..." 
-                  value={aiChatQuery}
-                  onChange={(e) => setAiChatQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
-                />
-                <button onClick={handleSendChat}>
-                  <Send size={16} />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 2: Code Review & Security */}
-          {aiTab === 'review' && (
-            <div className="review-container">
-              <h4>Inspection Checklist</h4>
-              <p className="subtitle">Automatic code grading & security vulnerabilities check.</p>
-              
-              {aiLoading ? (
-                <Loading />
-              ) : aiResponse && aiResponse.reviewItems ? (
-                <div className="review-list">
-                  {aiResponse.reviewItems.map((item, idx) => {
-                    const isCritical = item.startsWith('🔴');
-                    const isWarning = item.startsWith('🟠');
-                    const isGood = item.startsWith('🟢');
-                    let badgeClass = 'good';
-                    if (isCritical) badgeClass = 'critical';
-                    else if (isWarning) badgeClass = 'warning';
-
-                    return (
-                      <div key={idx} className={`review-card ${badgeClass}`}>
-                        <span>{item}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="review-empty">
-                  <CheckSquare size={36} className="placeholder-icon" />
-                  <p>No checks active. Click the **Review** or **Secure** buttons above to run codebase static inspections.</p>
+                  <div className="chat-bar-box">
+                    <input 
+                      type="text" 
+                      placeholder="Ask AI compiler assistant..." 
+                      value={aiChatQuery}
+                      onChange={e => setAiChatQuery(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleSendChat()}
+                    />
+                    <button onClick={handleSendChat}><Send size={14} /></button>
+                  </div>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Tab 3: Fix & Optimize Compare */}
-          {aiTab === 'fix' && (
-            <div className="fix-container">
-              {aiLoading ? (
-                <Loading />
-              ) : aiResponse && (aiResponse.correctedCode || aiResponse.improvedComplexity) ? (
-                <div className="fix-details">
-                  <h4>Optimizations & Fixes</h4>
-                  
-                  {aiResponse.originalComplexity && (
-                    <div className="complexity-card">
-                      <h5>Complexity Comparison:</h5>
-                      <div className="complexity-grid">
-                        <div className="old">Original: <strong>{aiResponse.originalComplexity}</strong></div>
-                        <div className="new">Improved: <strong>{aiResponse.improvedComplexity}</strong></div>
-                      </div>
+              {aiTab === 'review' && (
+                <div className="review-tab-container">
+                  <h4>Vulnerability Checklist:</h4>
+                  {aiLoading ? (
+                    <Loading />
+                  ) : aiResponse && aiResponse.reviewItems ? (
+                    <div className="review-cards-list">
+                      {aiResponse.reviewItems.map((item, idx) => (
+                        <div key={idx} className="review-card-alert">
+                          <span>{item}</span>
+                        </div>
+                      ))}
                     </div>
+                  ) : (
+                    <p className="placeholder-text">Click the Review AI pills to run checklist checks.</p>
                   )}
+                </div>
+              )}
 
-                  {aiResponse.explanation && (
-                    <div className="explanation-section">
-                      <h5>AI Diagnostics:</h5>
-                      <p>{aiResponse.explanation}</p>
-                    </div>
-                  )}
-
-                  {aiResponse.correctedCode && (
-                    <div className="corrected-code-wrapper">
-                      <h5>Autofix Code Preview:</h5>
-                      <pre className="corrected-code-preview">{aiResponse.correctedCode}</pre>
-                      <button className="glass-button success apply-fix-btn" onClick={applyCorrectedCode}>
+              {aiTab === 'fix' && (
+                <div className="fix-tab-container">
+                  {aiLoading ? (
+                    <Loading />
+                  ) : aiResponse && aiResponse.correctedCode ? (
+                    <div className="autofix-preview-box">
+                      <h5>Complexity: {aiResponse.originalComplexity || 'N/A'} → {aiResponse.improvedComplexity || 'N/A'}</h5>
+                      <pre className="corrected-code-snippet">{aiResponse.correctedCode}</pre>
+                      <button className="glass-button success apply-btn" onClick={applyCorrectedCode}>
                         Apply Corrections
                       </button>
                     </div>
+                  ) : (
+                    <p className="placeholder-text">Click optimized/bug fixes actions to view autofix diagnostics.</p>
                   )}
-                </div>
-              ) : (
-                <div className="fix-empty">
-                  <Cpu size={36} className="placeholder-icon" />
-                  <p>Ready to apply fixes. Click **Find Bugs**, **Refactor**, or **Optimize** above to test diagnostics.</p>
                 </div>
               )}
             </div>
-          )}
+          </aside>
+        )}
+
+      </div>
+
+      {/* 4. FOOTER STATUS BAR */}
+      <footer className="compiler-status-bar">
+        <div className="status-segment">
+          <span className="dot"></span>
+          <span>Status: <strong>{statusText}</strong></span>
         </div>
-      </aside>
+        <div className="status-segment border-left">
+          <span>Execution Time: <strong>{executionTime}</strong></span>
+        </div>
+        <div className="status-segment border-left">
+          <span>Memory Usage: <strong>{memoryUsage}</strong></span>
+        </div>
+      </footer>
     </div>
   );
 };

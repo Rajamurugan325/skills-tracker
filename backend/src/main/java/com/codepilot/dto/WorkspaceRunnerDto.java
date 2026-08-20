@@ -11,4 +11,6 @@ public class WorkspaceRunnerDto {
     private String stdout;
     private String stderr;
     private int exitCode;
+    private String executionTime;
+    private String memoryUsage;
 }

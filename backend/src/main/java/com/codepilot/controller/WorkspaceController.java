@@ -218,7 +218,9 @@ public class WorkspaceController {
     }
 
     @PostMapping("/run")
-    public ResponseEntity<WorkspaceRunnerDto> runCode(@RequestParam("path") String path) {
+    public ResponseEntity<WorkspaceRunnerDto> runCode(
+            @RequestParam("path") String path,
+            @RequestParam(value = "input", required = false) String customInput) {
         try {
             Path file = resolveSafePath(path);
             if (!Files.exists(file)) {
@@ -240,6 +242,8 @@ public class WorkspaceController {
                             .stdout("")
                             .stderr("Compilation Error:\n" + compileErr)
                             .exitCode(compileCode)
+                            .executionTime("0 ms")
+                            .memoryUsage("0 MB")
                             .build());
                 }
                 
@@ -257,6 +261,8 @@ public class WorkspaceController {
                             .stdout("")
                             .stderr("C Compilation Error:\n" + compileErr)
                             .exitCode(compileCode)
+                            .executionTime("0 ms")
+                            .memoryUsage("0 MB")
                             .build());
                 }
                 command.add(workspaceRoot.resolve(exeName).toString());
@@ -271,6 +277,8 @@ public class WorkspaceController {
                             .stdout("")
                             .stderr("C++ Compilation Error:\n" + compileErr)
                             .exitCode(compileCode)
+                            .executionTime("0 ms")
+                            .memoryUsage("0 MB")
                             .build());
                 }
                 command.add(workspaceRoot.resolve(exeName).toString());
@@ -280,6 +288,28 @@ public class WorkspaceController {
                 command.addAll(Arrays.asList("node", file.toAbsolutePath().toString()));
             } else if (fileName.endsWith(".ts")) {
                 command.addAll(Arrays.asList("npx", "ts-node", file.toAbsolutePath().toString()));
+            } else if (fileName.endsWith(".php")) {
+                command.addAll(Arrays.asList("php", file.toAbsolutePath().toString()));
+            } else if (fileName.endsWith(".go")) {
+                command.addAll(Arrays.asList("go", "run", file.toAbsolutePath().toString()));
+            } else if (fileName.endsWith(".cs")) {
+                command.addAll(Arrays.asList("dotnet", "run", file.toAbsolutePath().toString()));
+            } else if (fileName.endsWith(".kt")) {
+                String jarName = fileName.substring(0, fileName.lastIndexOf(".")) + ".jar";
+                ProcessBuilder compileBuilder = new ProcessBuilder("kotlinc", file.toAbsolutePath().toString(), "-include-runtime", "-d", workspaceRoot.resolve(jarName).toString());
+                Process compileProcess = compileBuilder.start();
+                String compileErr = readStream(compileProcess.getErrorStream());
+                int compileCode = compileProcess.waitFor();
+                if (compileCode != 0) {
+                    return ResponseEntity.ok(WorkspaceRunnerDto.builder()
+                            .stdout("")
+                            .stderr("Kotlin Compilation Error:\n" + compileErr)
+                            .exitCode(compileCode)
+                            .executionTime("0 ms")
+                            .memoryUsage("0 MB")
+                            .build());
+                }
+                command.addAll(Arrays.asList("java", "-jar", workspaceRoot.resolve(jarName).toString()));
             } else if (fileName.endsWith(".sql")) {
                 command.addAll(Arrays.asList("mysql", "-u", "root", "-praja2006", "-t", "codepilot", "-e", "source " + file.toAbsolutePath().toString().replace("\\", "/")));
             } else if (fileName.endsWith(".html") || fileName.endsWith(".css")) {
@@ -290,18 +320,31 @@ public class WorkspaceController {
                                 "Status: Active web page rendering at index.html")
                         .stderr("")
                         .exitCode(0)
+                        .executionTime("5 ms")
+                        .memoryUsage("2 MB")
                         .build());
             } else {
                 return ResponseEntity.badRequest().body(WorkspaceRunnerDto.builder()
                         .stdout("")
                         .stderr("Running code of this file type is not supported.")
                         .exitCode(-1)
+                        .executionTime("0 ms")
+                        .memoryUsage("0 MB")
                         .build());
             }
 
+            long startTime = System.nanoTime();
             ProcessBuilder runBuilder = new ProcessBuilder(command);
             runBuilder.directory(workspaceRoot.toFile());
             Process runProcess = runBuilder.start();
+
+            // Write custom input to stdin if provided
+            if (customInput != null && !customInput.isEmpty()) {
+                try (OutputStream os = runProcess.getOutputStream()) {
+                    os.write(customInput.getBytes());
+                    os.flush();
+                }
+            }
 
             // Setup 5 second timeout safety
             Timer timer = new Timer(true);
@@ -318,11 +361,19 @@ public class WorkspaceController {
             String stderr = readStream(runProcess.getErrorStream());
             int exitCode = runProcess.waitFor();
             timer.cancel();
+            long endTime = System.nanoTime();
+            
+            double durationMs = (endTime - startTime) / 1_000_000.0;
+            String executionTimeStr = String.format("%.1f ms", durationMs);
+            long totalMemoryBytes = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+            String memoryUsageStr = String.format("%.2f MB", totalMemoryBytes / (1024.0 * 1024.0));
 
             return ResponseEntity.ok(WorkspaceRunnerDto.builder()
                     .stdout(stdout)
                     .stderr(stderr)
                     .exitCode(exitCode)
+                    .executionTime(executionTimeStr)
+                    .memoryUsage(memoryUsageStr)
                     .build());
 
         } catch (Exception e) {
@@ -331,6 +382,8 @@ public class WorkspaceController {
                             .stdout("")
                             .stderr("Execution Exception: " + e.getMessage())
                             .exitCode(-1)
+                            .executionTime("0 ms")
+                            .memoryUsage("0 MB")
                             .build());
         }
     }

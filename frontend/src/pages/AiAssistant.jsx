@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import Loading from '../components/Loading';
 import Error from '../components/Error';
-import { Send, Bot, User, Sparkles, RefreshCw, HelpCircle, Mic, Volume2, VolumeX } from 'lucide-react';
+import { Send, Bot, User, Sparkles, RefreshCw, HelpCircle, Mic, Volume2, VolumeX, Paperclip, FileText, X } from 'lucide-react';
 import './AiAssistant.css';
 
 const AiAssistant = () => {
@@ -13,6 +13,9 @@ const AiAssistant = () => {
   const [error, setError] = useState('');
   
   const chatEndRef = useRef(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   const predefinedPrompts = [
     { text: 'Analyze my weak areas', desc: 'Checks your wrong answers and stats' },
@@ -98,6 +101,31 @@ const AiAssistant = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSelectedFile(file);
+    if (file.type.startsWith('image/')) {
+      setFilePreview(URL.createObjectURL(file));
+    } else {
+      setFilePreview(null);
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const getAttachmentUrl = (path) => {
+    if (!path) return '';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+    return `${baseUrl.replace(/\/$/, '')}${path}`;
+  };
+
   useEffect(() => {
     fetchChatHistory();
   }, []);
@@ -124,23 +152,46 @@ const AiAssistant = () => {
 
   const sendMessage = async (textToSend) => {
     const msgText = textToSend || input;
-    if (!msgText.trim() || loading) return;
+    if (!msgText.trim() && !selectedFile) return;
 
     if (!textToSend) setInput('');
     setError('');
     
-    // Add user message to UI immediately
+    const currentFile = selectedFile;
+    const currentPreview = filePreview;
+    
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
     const userMessage = {
       message: msgText,
       sender: 'USER',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      fileUrl: currentPreview ? currentPreview : (currentFile ? '#' : null),
+      fileType: currentFile ? currentFile.type : null,
+      fileName: currentFile ? currentFile.name : null
     };
     
     setMessages(prev => [...prev, userMessage]);
     setLoading(true);
 
     try {
-      const res = await api.post('/api/ai/chat', { message: msgText });
+      let res;
+      if (currentFile) {
+        const formData = new FormData();
+        formData.append('message', msgText);
+        formData.append('file', currentFile);
+        res = await api.post('/api/ai/chat', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      } else {
+        res = await api.post('/api/ai/chat', { message: msgText });
+      }
       setMessages(prev => [...prev, res.data]);
     } catch (err) {
       setError('Failed to send message. Please try again.');
@@ -274,6 +325,34 @@ const AiAssistant = () => {
                   </div>
                   <div className="message-content">
                     {msg.sender === 'AI' ? renderMarkdown(msg.message) : msg.message}
+                    {msg.fileUrl && (
+                      <div className="message-attachment" style={{ marginTop: '10px', maxWidth: '100%' }}>
+                        {msg.fileType?.startsWith('image/') ? (
+                          <img 
+                            src={msg.fileUrl.startsWith('blob:') ? msg.fileUrl : getAttachmentUrl(msg.fileUrl)} 
+                            alt={msg.fileName} 
+                            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }} 
+                          />
+                        ) : msg.fileType?.startsWith('video/') ? (
+                          <video 
+                            src={msg.fileUrl.startsWith('blob:') ? msg.fileUrl : getAttachmentUrl(msg.fileUrl)} 
+                            controls 
+                            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)' }} 
+                          />
+                        ) : (
+                          <a 
+                            href={msg.fileUrl.startsWith('blob:') ? '#' : getAttachmentUrl(msg.fileUrl)} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="attachment-link glass-panel"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--primary)', textDecoration: 'none', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}
+                          >
+                            <FileText size={16} />
+                            <span>{msg.fileName || 'View Attachment'}</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <span className="message-time">{msg.timestamp || 'Just now'}</span>
                 </div>
@@ -302,7 +381,31 @@ const AiAssistant = () => {
 
       {error && <div className="chat-error-bar"><Error message={error} /></div>}
 
+      {selectedFile && (
+        <div className="file-upload-preview-bar glass-panel" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 15px', margin: '0 0 10px 0', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)', background: 'rgba(255, 255, 255, 0.015)' }}>
+          {filePreview ? (
+            <img src={filePreview} alt="Preview" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+          ) : (
+            <FileText size={24} style={{ color: 'var(--primary)' }} />
+          )}
+          <div style={{ flexGrow: 1, overflow: 'hidden' }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedFile.name}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+          </div>
+          <button onClick={removeFile} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '5px' }}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       <div className="chat-input-area glass-panel">
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          onChange={handleFileChange} 
+          style={{ display: 'none' }} 
+          accept="image/*,video/*,application/pdf,text/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+        />
         <input 
           type="text" 
           value={input}
@@ -311,6 +414,14 @@ const AiAssistant = () => {
           placeholder="Ask about your performance, topics, or explanations..."
           disabled={loading}
         />
+        <button
+          className="attach-button glass-button"
+          onClick={() => fileInputRef.current?.click()}
+          title="Attach Image, Video, or Document"
+          style={{ width: '36px', height: '36px', borderRadius: '50%', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '5px' }}
+        >
+          <Paperclip size={16} />
+        </button>
         <button
           className={`mic-button glass-button ${isListening ? 'active' : ''}`}
           onClick={toggleListening}
@@ -322,7 +433,7 @@ const AiAssistant = () => {
         <button 
           className="send-message-btn glass-button"
           onClick={() => sendMessage()}
-          disabled={!input.trim() || loading}
+          disabled={(!input.trim() && !selectedFile) || loading}
         >
           <Send size={16} />
         </button>

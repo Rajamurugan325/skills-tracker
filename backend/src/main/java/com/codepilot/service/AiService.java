@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface AiService {
     List<ChatMessageDto> getChatHistory(Long userId);
-    ChatMessageDto chat(Long userId, String userMessage);
+    ChatMessageDto chat(Long userId, String userMessage, String fileUrl, String fileType, String fileName);
 }

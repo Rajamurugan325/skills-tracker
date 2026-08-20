@@ -11,4 +11,7 @@ public class ChatMessageDto {
     private String message;
     private String sender; // USER or AI
     private String timestamp;
+    private String fileUrl;
+    private String fileType;
+    private String fileName;
 }

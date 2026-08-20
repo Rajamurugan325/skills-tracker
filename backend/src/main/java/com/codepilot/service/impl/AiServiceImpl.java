@@ -55,13 +55,16 @@ public class AiServiceImpl implements AiService {
                         .message(msg.getMessage())
                         .sender(msg.getSender())
                         .timestamp(msg.getCreatedAt().format(formatter))
+                        .fileUrl(msg.getFileUrl())
+                        .fileType(msg.getFileType())
+                        .fileName(msg.getFileName())
                         .build())
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public ChatMessageDto chat(Long userId, String userMessage) {
+    public ChatMessageDto chat(Long userId, String userMessage, String fileUrl, String fileType, String fileName) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
@@ -70,6 +73,9 @@ public class AiServiceImpl implements AiService {
                 .user(user)
                 .message(userMessage)
                 .sender("USER")
+                .fileUrl(fileUrl)
+                .fileType(fileType)
+                .fileName(fileName)
                 .build();
         chatMessageRepository.save(userChat);
 
@@ -98,6 +104,9 @@ public class AiServiceImpl implements AiService {
                 .message(savedAiChat.getMessage())
                 .sender(savedAiChat.getSender())
                 .timestamp(savedAiChat.getCreatedAt().format(formatter))
+                .fileUrl(savedAiChat.getFileUrl())
+                .fileType(savedAiChat.getFileType())
+                .fileName(savedAiChat.getFileName())
                 .build();
     }
 

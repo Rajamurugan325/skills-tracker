@@ -27,6 +27,15 @@ public class ChatMessage {
     @Column(nullable = false, length = 10)
     private String sender; // USER or AI
 
+    @Column(name = "file_url")
+    private String fileUrl;
+
+    @Column(name = "file_type")
+    private String fileType;
+
+    @Column(name = "file_name")
+    private String fileName;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

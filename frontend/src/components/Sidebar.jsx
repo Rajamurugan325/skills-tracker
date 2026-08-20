@@ -47,10 +47,6 @@ const Sidebar = () => {
               <LayoutDashboard size={18} />
               <span>Dashboard</span>
             </Link>
-            <Link to="/workspace" className={`menu-item ${isActive('/workspace')}`}>
-              <Code size={18} />
-              <span>💻 Coding Workspace</span>
-            </Link>
             <Link to="/practice" className={`menu-item ${isActive('/practice')}`}>
               <BookOpen size={18} />
               <span>Practice Questions</span>

@@ -248,15 +248,6 @@ const Quiz = () => {
           onOptionSelect={handleOptionSelect}
         />
 
-        {activeQ.questionType && ['CODING', 'SQL', 'WEB', 'CONFIGURATION'].includes(activeQ.questionType.toUpperCase()) && (
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
-            <Link to={`/workspace?questionId=${activeQ.id}`} target="_blank" className="glass-button success flex items-center gap-2" style={{ textDecoration: 'none' }}>
-              <Code2 size={16} style={{ marginRight: '6px' }} />
-              Open in Coding Workspace
-            </Link>
-          </div>
-        )}
-
         <div className="quiz-navigation">
           <button
             onClick={prevQuestion}

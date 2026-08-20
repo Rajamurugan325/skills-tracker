@@ -16,9 +16,9 @@ const AiAssistant = () => {
 
   const predefinedPrompts = [
     { text: 'Analyze my weak areas', desc: 'Checks your wrong answers and stats' },
+    { text: 'Check my consistency status', desc: 'Evaluates your Consistency Mode and streaks' },
     { text: 'Give me a study plan', desc: 'Generates a custom topic checklist' },
-    { text: 'Explain JavaScript closure', desc: 'Concept study with examples' },
-    { text: 'Explain SQL database indexing', desc: 'Performance and query optimization' }
+    { text: 'Explain JavaScript closure', desc: 'Concept study with examples' }
   ];
 
   useEffect(() => {

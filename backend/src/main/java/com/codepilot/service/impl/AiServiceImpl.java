@@ -38,6 +38,12 @@ public class AiServiceImpl implements AiService {
     @Autowired
     private UserTopicProgressRepository userTopicProgressRepository;
 
+    @Autowired
+    private QuizAttemptRepository quizAttemptRepository;
+
+    @Autowired
+    private MockInterviewRepository mockInterviewRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -162,6 +168,28 @@ public class AiServiceImpl implements AiService {
             }
         }
 
+        // Calculate Consistency Score for RAG Context
+        java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusDays(14);
+        List<QuizAttempt> recentQuizzes = quizAttemptRepository.findByUserId(userId).stream()
+                .filter(q -> q.getStartTime().isAfter(cutoff))
+                .collect(Collectors.toList());
+        List<MockInterview> recentMocks = mockInterviewRepository.findByUserId(userId).stream()
+                .filter(m -> m.getStartTime().isAfter(cutoff))
+                .collect(Collectors.toList());
+
+        Set<java.time.LocalDate> activeDates = new HashSet<>();
+        recentQuizzes.forEach(q -> activeDates.add(q.getStartTime().toLocalDate()));
+        recentMocks.forEach(m -> activeDates.add(m.getStartTime().toLocalDate()));
+
+        int activeDays = activeDates.size();
+        double consistencyScore = Math.min(100.0, (activeDays / 7.0) * 100.0);
+        double finalConsistency = Math.round(consistencyScore * 10.0) / 10.0;
+        
+        context.append("### Candidate's Consistency Mode Stats:\n");
+        context.append(String.format("- **Consistency Mode Status**: Active\n"));
+        context.append(String.format("- **Active Days (Last 14 Days)**: %d days\n", activeDays));
+        context.append(String.format("- **Consistency Score**: %.1f%%\n\n", finalConsistency));
+
         return context.toString();
     }
 
@@ -174,11 +202,12 @@ public class AiServiceImpl implements AiService {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
-            // Construct system instruction payload
             String systemInstruction = "You are CodePilot AI, an intelligent Retrieval-Augmented Generation (RAG) study assistant. " +
                     "Your goal is to help software candidates analyze their performance, clarify programming/CS concepts, " +
                     "and review mistakes. You have access to the candidate's database context (retrieved questions, weak areas, " +
-                    "and wrong answers). Use this context to personalize your answers. Render code snippets in standard markdown blocks.";
+                    "wrong answers, and their Consistency Mode status/score). Use this context to personalize your answers. " +
+                    "Specifically, if they ask about their consistency, streaks, or their active Consistency Mode, evaluate their active " +
+                    "days and encourage them to maintain their streak! Render code snippets in standard markdown blocks.";
 
             String completePrompt = String.format("%s\n\nRAG DATABASE CONTEXT:\n%s\n\nUSER INQUIRY: %s", 
                     systemInstruction, ragContext, userPrompt);
@@ -230,7 +259,22 @@ public class AiServiceImpl implements AiService {
         response.append("### 🤖 CodePilot Local RAG Assistant\n");
         response.append("> **Notice**: Running in **Offline RAG Mode**. Configure `GEMINI_API_KEY` in environment variables for online conversational intelligence.\n\n");
 
-        if (cleanPrompt.contains("weak") || cleanPrompt.contains("mistake") || cleanPrompt.contains("struggle") || cleanPrompt.contains("fail")) {
+        if (cleanPrompt.contains("consistency") || cleanPrompt.contains("streak") || cleanPrompt.contains("active")) {
+            response.append("Here is your **Consistency Mode analysis**:\n\n");
+            if (ragContext.contains("Consistency Mode Stats")) {
+                int startIdx = ragContext.indexOf("### Candidate's Consistency Mode Stats:");
+                if (startIdx != -1) {
+                    response.append(ragContext.substring(startIdx).replaceAll("###", "####"));
+                }
+            } else {
+                response.append("- **Consistency Mode Status**: Active\n");
+                response.append("- **Details**: You are actively practicing quizzes and mock sessions to improve your retention rates.\n");
+            }
+            response.append("\n**How Consistency Score works**:\n");
+            response.append("- Your score is calculated based on how many distinct days in the last 14 days you completed at least one quiz or mock interview.\n");
+            response.append("- Completing at least 7 active days of learning in the last two weeks brings your Consistency rating to **100%**.\n");
+            response.append("- Maintain daily engagement to prevent your score from decaying and keep your overall readiness indicator high!");
+        } else if (cleanPrompt.contains("weak") || cleanPrompt.contains("mistake") || cleanPrompt.contains("struggle") || cleanPrompt.contains("fail")) {
             response.append("Based on your platform history, I have analyzed your weak areas:\n\n");
             if (ragContext.contains("Struggle Area") || ragContext.contains("Low Accuracy Areas")) {
                 response.append(ragContext.replaceAll("###", "####"));

@@ -79,6 +79,14 @@ const CodePilotIde = () => {
     } else if (q.category?.toUpperCase() === 'C') {
       initialLang = 'c';
     }
+
+    if (q.questionType?.toUpperCase() === 'WEB') {
+      initialLang = 'html';
+      setActiveTab('preview');
+    } else {
+      setActiveTab('console');
+    }
+
     setSelectedLanguage(initialLang);
     setCode(getStarterTemplate(initialLang));
     setSubmitResults(null);
@@ -88,6 +96,8 @@ const CodePilotIde = () => {
 
   const getStarterTemplate = (lang) => {
     switch (lang) {
+      case 'html':
+        return `<!DOCTYPE html>\n<html>\n<head>\n    <style>\n        body { background: #111; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }\n        h1 { color: #818cf8; }\n    </style>\n</head>\n<body>\n    <h1>CodePilot Live Compiler</h1>\n    <p>Write your markup and preview it here!</p>\n</body>\n</html>`;
       case 'java':
         return `import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Write your solution here\n    }\n}`;
       case 'c':
@@ -223,6 +233,7 @@ const CodePilotIde = () => {
 
   const getEditorLanguage = (lang) => {
     switch (lang) {
+      case 'html': return 'html';
       case 'java': return 'java';
       case 'python': return 'python';
       case 'javascript': return 'javascript';
@@ -245,6 +256,7 @@ const CodePilotIde = () => {
 
         <div className="middle-controls">
           <select className="language-selector-dropdown" value={selectedLanguage} onChange={handleLanguageChange}>
+            <option value="html">HTML</option>
             <option value="java">Java</option>
             <option value="python">Python</option>
             <option value="javascript">JavaScript</option>
@@ -411,6 +423,14 @@ const CodePilotIde = () => {
               >
                 Submission History
               </button>
+              {selectedQuestion && selectedQuestion.questionType === 'WEB' && (
+                <button 
+                  className={`console-tab-btn ${activeTab === 'preview' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('preview')}
+                >
+                  Web Preview
+                </button>
+              )}
             </div>
             
             <div className="execution-badges flex gap-4 text-xs font-semibold">
@@ -420,6 +440,16 @@ const CodePilotIde = () => {
           </div>
 
           <div className="console-outputs-body">
+            {activeTab === 'preview' && (
+              <div className="web-preview-container" style={{ height: '100%', background: '#fff', borderRadius: '4px', overflow: 'hidden' }}>
+                <iframe 
+                  srcDoc={code}
+                  title="Web Preview"
+                  sandbox="allow-scripts"
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                />
+              </div>
+            )}
             {activeTab === 'console' ? (
               <div className="console-terminal-view">
                 {submitResults ? (

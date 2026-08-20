@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import Loading from '../components/Loading';
 import Error from '../components/Error';
-import { Send, Bot, User, Sparkles, RefreshCw, HelpCircle } from 'lucide-react';
+import { Send, Bot, User, Sparkles, RefreshCw, HelpCircle, Mic, Volume2, VolumeX } from 'lucide-react';
 import './AiAssistant.css';
 
 const AiAssistant = () => {
@@ -20,6 +20,83 @@ const AiAssistant = () => {
     { text: 'Give me a study plan', desc: 'Generates a custom topic checklist' },
     { text: 'Explain JavaScript closure', desc: 'Concept study with examples' }
   ];
+
+  const [isListening, setIsListening] = useState(false);
+  const [speakingIndex, setSpeakingIndex] = useState(null);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = 'en-US';
+
+      rec.onstart = () => {
+        setIsListening(true);
+      };
+
+      rec.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+      };
+
+      rec.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        setIsListening(false);
+      };
+
+      rec.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = rec;
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Speech recognition is not supported in this browser. Try Google Chrome or Microsoft Edge.');
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.start();
+    }
+  };
+
+  const speakText = (text, index) => {
+    if (!window.speechSynthesis) {
+      alert('Text-to-speech is not supported in this browser.');
+      return;
+    }
+
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      if (speakingIndex === index) {
+        setSpeakingIndex(null);
+        return;
+      }
+    }
+
+    const cleanText = text.replace(/[*#`>_\-]/g, '').trim();
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'en-US';
+    
+    utterance.onend = () => {
+      setSpeakingIndex(null);
+    };
+
+    utterance.onerror = () => {
+      setSpeakingIndex(null);
+    };
+
+    setSpeakingIndex(index);
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     fetchChatHistory();
@@ -180,6 +257,21 @@ const AiAssistant = () => {
                   {msg.sender === 'AI' ? <Bot size={16} /> : <User size={16} />}
                 </div>
                 <div className="message-bubble glass-panel">
+                  <div className="message-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', gap: '20px' }}>
+                    <span className="sender-name" style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)' }}>
+                      {msg.sender === 'AI' ? 'CodePilot AI' : 'You'}
+                    </span>
+                    {msg.sender === 'AI' && (
+                      <button 
+                        className="tts-speak-btn" 
+                        onClick={() => speakText(msg.message, i)}
+                        title={speakingIndex === i ? "Stop Reading" : "Read Aloud"}
+                        style={{ background: 'transparent', border: 'none', color: speakingIndex === i ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer', padding: '2px' }}
+                      >
+                        {speakingIndex === i ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                      </button>
+                    )}
+                  </div>
                   <div className="message-content">
                     {msg.sender === 'AI' ? renderMarkdown(msg.message) : msg.message}
                   </div>
@@ -219,6 +311,14 @@ const AiAssistant = () => {
           placeholder="Ask about your performance, topics, or explanations..."
           disabled={loading}
         />
+        <button
+          className={`mic-button glass-button ${isListening ? 'active' : ''}`}
+          onClick={toggleListening}
+          title={isListening ? "Listening... Click to Stop" : "Voice Input (Speech to Text)"}
+          style={{ width: '36px', height: '36px', borderRadius: '50%', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '5px' }}
+        >
+          <Mic size={16} />
+        </button>
         <button 
           className="send-message-btn glass-button"
           onClick={() => sendMessage()}

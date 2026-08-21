@@ -210,7 +210,7 @@ public class AiServiceImpl implements AiService {
     }
 
     private String generateWithGemini(String userPrompt, String ragContext, String apiKey) {
-        String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+        String urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" + apiKey;
         try {
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();

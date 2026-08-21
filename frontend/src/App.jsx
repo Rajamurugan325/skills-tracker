@@ -17,7 +17,6 @@ import Recommendations from './pages/Recommendations';
 import MockInterview from './pages/MockInterview';
 import JobRole from './pages/JobRole';
 import Profile from './pages/Profile';
-import AiAssistant from './pages/AiAssistant';
 import CodePilotIde from './pages/CodePilotIde';
 
 // Admin Pages
@@ -72,7 +71,6 @@ const App = () => {
           <Route path="/history" element={<PrivateRoute><AppLayout><History /></AppLayout></PrivateRoute>} />
           <Route path="/wrong-answers" element={<PrivateRoute><AppLayout><WrongAnswers /></AppLayout></PrivateRoute>} />
           <Route path="/recommendations" element={<PrivateRoute><AppLayout><Recommendations /></AppLayout></PrivateRoute>} />
-          <Route path="/ai-assistant" element={<PrivateRoute><AppLayout><AiAssistant /></AppLayout></PrivateRoute>} />
           <Route path="/mock-interview" element={<PrivateRoute><AppLayout><MockInterview /></AppLayout></PrivateRoute>} />
           <Route path="/job-role" element={<PrivateRoute><AppLayout><JobRole /></AppLayout></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><AppLayout><Profile /></AppLayout></PrivateRoute>} />

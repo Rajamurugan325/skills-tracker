@@ -69,10 +69,6 @@ const Sidebar = () => {
               <Sparkles size={18} />
               <span>Recommendations</span>
             </Link>
-            <Link to="/ai-assistant" className={`menu-item ${isActive('/ai-assistant')}`}>
-              <Bot size={18} />
-              <span>AI Copilot</span>
-            </Link>
 
             <div className="menu-group">CAREER READY</div>
             <Link to="/mock-interview" className={`menu-item ${isActive('/mock-interview')}`}>

@@ -35,4 +35,4 @@ services:
         fromService:
           name: codepilot-backend
           type: web
-          property: host
+          property: url
